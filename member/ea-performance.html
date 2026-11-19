@@ -5,107 +5,231 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="theme-color" content="#060b14"/>
 <title>Acc Performance — Smart AI</title>
-<meta name="description" content="Performa akun MT5 member Smart AI: equity, daily profit, dan status."/>
+<meta name="description" content="Performa akun MT5 member Smart AI: equity, daily profit, chart, dan status real-time."/>
 <meta name="robots" content="noindex, nofollow"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/app.css?v=20261119a">
+<link rel="stylesheet" href="../css/app.css?v=20261119p">
 <style>
-.perf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.25rem}
-.perf-card{border:1px solid var(--border);border-radius:16px;padding:1.15rem 1.25rem;background:var(--bg-card-solid)}
-.perf-card h3{margin:0 0 .35rem;font-size:1rem}
-.perf-card .meta{font-size:.78rem;color:var(--text-muted);margin-bottom:.85rem}
+.perf-hero{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between;margin-bottom:1.25rem}
+.perf-hero h1{margin:0 0 .25rem;font-size:1.45rem;font-weight:800}
+.perf-hero p{margin:0;color:var(--text-muted);font-size:.88rem}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem}
+@media(max-width:900px){.stat-row{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.stat-row{grid-template-columns:1fr}}
+.stat-box{background:var(--bg-card-solid);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.2rem;position:relative;overflow:hidden}
+.stat-box .label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:.35rem}
+.stat-box .value{font-size:1.35rem;font-weight:800;letter-spacing:-.02em}
+.stat-box .value.up{color:var(--green)}
+.stat-box .value.neg{color:#f87171}
+.stat-box .hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem}
+.stat-box .bar{position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--teal))}
+.charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:1.15rem;margin-bottom:1.25rem}
+@media(max-width:960px){.charts-row{grid-template-columns:1fr}}
+.chart-card{background:var(--bg-card-solid);border:1px solid var(--border);border-radius:16px;padding:1.15rem 1.25rem}
+.chart-card h3{margin:0 0 .15rem;font-size:.95rem;font-weight:800}
+.chart-card .sub{font-size:.75rem;color:var(--text-muted);margin-bottom:1rem}
+.chart-wrap{position:relative;height:240px}
+.chart-wrap.sm{height:200px}
+.perf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin-bottom:1.25rem}
+.perf-card{border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.25rem;background:var(--bg-card-solid)}
+.perf-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.5rem}
+.perf-card h3{margin:0;font-size:1.05rem;font-weight:800}
+.perf-card .meta{font-size:.78rem;color:var(--text-muted);margin-bottom:.9rem;line-height:1.4}
 .perf-metrics{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
-.perf-metrics div{padding:.55rem .7rem;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
-.perf-metrics span{display:block;font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+.perf-metrics div{padding:.6rem .7rem;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+.perf-metrics span{display:block;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.15rem}
 .perf-metrics strong{font-size:.95rem}
 .perf-metrics .up{color:var(--green)}
 .perf-metrics .neg{color:#f87171}
-.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.25rem}
-.stat-box{background:var(--bg-card-solid);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.2rem}
-.stat-box .label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-dim);margin-bottom:.3rem}
-.stat-box .value{font-size:1.25rem;font-weight:800}
-.stat-box .value.up{color:var(--green)}
-.badge-st{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:999px}
+.badge-st{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;font-weight:700;padding:.22rem .6rem;border-radius:999px}
 .badge-st.on{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
-.badge-st.off{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
-.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:.75rem;color:var(--text-muted)}
-.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite}
+.badge-st.off{background:rgba(148,163,184,.1);color:var(--text-muted);border:1px solid var(--border)}
+.badge-st.demo{background:rgba(96,165,250,.12);color:var(--blue);border:1px solid rgba(96,165,250,.25)}
+.detail-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.detail-table th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text-dim);padding:.55rem .4rem;border-bottom:1px solid var(--border)}
+.detail-table td{padding:.7rem .4rem;border-bottom:1px solid var(--border)}
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem;gap:.85rem;color:var(--text-muted)}
+.spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin:0 0 .9rem}
+.sec-head h2{margin:0;font-size:1rem;font-weight:800}
+.sec-head .sub{font-size:.75rem;color:var(--text-muted)}
+.live-pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:var(--green)}
+.live-pill i{width:6px;height:6px;border-radius:50%;background:var(--green)}
 </style>
 <script>try{var t=localStorage.getItem('smartai_theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 </head>
 <body>
-<script src="../js/auth.js?v=20261119a"></script>
-<script src="../js/app.js?v=20261119a"></script>
-<script src="../js/mt5-api.js?v=20261119a"></script>
+<script src="../js/auth.js?v=20261119p"></script>
+<script src="../js/app.js?v=20261119p"></script>
+<script src="../js/mt5-api-v2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 (function () {
   var user = renderShell('performance');
   if (!user) return;
   var root = document.getElementById('page-content');
   if (!root) return;
-
+  root.innerHTML = '<div class="page-loading"><div class="spin"></div><p>Memuat performa akun…</p></div>';
+  var equityChart = null, dailyChart = null, pieChart = null;
   function fmt(n) {
-    if (window.SmartAIMt5 && SmartAIMt5.formatUSD) return SmartAIMt5.formatUSD(n);
+    if (window.SmartAIMT5 && SmartAIMT5.formatUSD) return SmartAIMT5.formatUSD(n);
     if (!Number.isFinite(Number(n))) return '\u2014';
-    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(Number(n));
   }
-  function sanitizeDaily(v) {
-    var n = Number(v);
-    if (!Number.isFinite(n)) return 0;
-    if (Math.abs(n) > 500000) return 0;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function clampDaily(n) {
+    n = Number(n);
+    if (!Number.isFinite(n) || Math.abs(n) > 500000) return 0;
     return n;
   }
-
+  function statusBadge(st) {
+    var s = String(st || '').toUpperCase();
+    if (s === 'ONLINE' || s === 'LIVE') return '<span class="badge-st on">● ' + esc(st) + '</span>';
+    if (s === 'DEMO') return '<span class="badge-st demo">● DEMO</span>';
+    return '<span class="badge-st off">● ' + esc(st || 'OFFLINE') + '</span>';
+  }
+  function chartColors() {
+    var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+    return {
+      text: dark ? 'rgba(148,163,184,.9)' : 'rgba(71,85,105,.9)',
+      grid: dark ? 'rgba(148,163,184,.12)' : 'rgba(71,85,105,.12)',
+      cyan: 'rgba(45,212,191,.9)', green: 'rgba(52,211,153,.9)',
+      blue: 'rgba(96,165,250,.9)', gold: 'rgba(251,191,36,.9)', purple: 'rgba(167,139,250,.9)'
+    };
+  }
+  function buildCharts(accounts) {
+    var c = chartColors();
+    var labels = accounts.map(function (a) { return a.account_id || a.name || '—'; });
+    var equities = accounts.map(function (a) { return Number(a.equity) || 0; });
+    var dailies = accounts.map(function (a) { return clampDaily(a.daily_profit); });
+    var palette = [c.cyan, c.gold, c.purple, c.blue, c.green];
+    if (equityChart) equityChart.destroy();
+    if (dailyChart) dailyChart.destroy();
+    if (pieChart) pieChart.destroy();
+    var eqEl = document.getElementById('chart-equity');
+    var dyEl = document.getElementById('chart-daily');
+    var pieEl = document.getElementById('chart-pie');
+    if (!eqEl || !window.Chart) return;
+    equityChart = new Chart(eqEl, {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ label: 'Equity', data: equities, backgroundColor: labels.map(function(_,i){return palette[i%palette.length];}), borderRadius: 8, maxBarThickness: 48 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){ return fmt(ctx.raw); } } } },
+        scales: {
+          x: { ticks: { color: c.text }, grid: { display: false } },
+          y: { ticks: { color: c.text, callback: function(v){ return '$'+Number(v).toLocaleString(); } }, grid: { color: c.grid } }
+        }
+      }
+    });
+    dailyChart = new Chart(dyEl, {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ label: 'Daily', data: dailies, backgroundColor: dailies.map(function(v){ return v>=0?c.green:'rgba(248,113,113,.85)'; }), borderRadius: 8, maxBarThickness: 48 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx){ return fmt(ctx.raw); } } } },
+        scales: {
+          x: { ticks: { color: c.text }, grid: { display: false } },
+          y: { ticks: { color: c.text, callback: function(v){ return '$'+Number(v).toLocaleString(); } }, grid: { color: c.grid } }
+        }
+      }
+    });
+    if (pieEl) {
+      pieChart = new Chart(pieEl, {
+        type: 'doughnut',
+        data: { labels: labels, datasets: [{ data: equities.map(function(v){return Math.max(v,0);}), backgroundColor: labels.map(function(_,i){return palette[i%palette.length];}), borderWidth: 0, hoverOffset: 6 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '62%',
+          plugins: {
+            legend: { position: 'bottom', labels: { color: c.text, boxWidth: 12, padding: 12 } },
+            tooltip: { callbacks: { label: function(ctx){ return ctx.label+': '+fmt(ctx.raw); } } }
+          }
+        }
+      });
+    }
+  }
   async function load() {
-    root.innerHTML = '<div class="page-loading"><div class="spin"></div><p>Memuat performa akun\u2026</p></div>';
     var accounts = [];
     try {
-      if (window.SmartAIMt5 && SmartAIMt5.getAccounts) accounts = await SmartAIMt5.getAccounts();
-    } catch (e) {}
-    if (!accounts || !accounts.length) {
-      try {
-        if (window.SmartAIMt5 && SmartAIMt5.getDemoAccounts) accounts = SmartAIMt5.getDemoAccounts();
-      } catch (e2) {}
-    }
-
-    var totalEq = 0, totalDaily = 0, totalProfit = 0, online = 0;
-    (accounts || []).forEach(function (a) {
+      if (typeof SmartAIMT5 !== 'undefined' && SmartAIMT5.getAccounts) {
+        accounts = await SmartAIMT5.getAccounts(true);
+        if (!accounts || !accounts.length) {
+          await new Promise(function(r){ setTimeout(r, 700); });
+          accounts = await SmartAIMT5.getAccounts(true);
+        }
+      }
+    } catch (e) { accounts = []; }
+    accounts = accounts || [];
+    accounts.sort(function(a,b){ return String(a.account_id||'').localeCompare(String(b.account_id||'')); });
+    var live = (typeof SmartAIMT5 !== 'undefined' && SmartAIMT5.isLive) ? SmartAIMT5.isLive() : false;
+    var totalEq = 0, totalDaily = 0, totalProfit = 0, onlineN = 0;
+    accounts.forEach(function(a){
       if (Number.isFinite(Number(a.equity))) totalEq += Number(a.equity);
-      totalDaily += sanitizeDaily(a.daily_profit);
+      totalDaily += clampDaily(a.daily_profit);
       if (Number.isFinite(Number(a.total_profit))) totalProfit += Number(a.total_profit);
-      var st = String(a.status || '').toUpperCase();
-      if (st === 'ONLINE' || st === 'DEMO' || st === 'LIVE') online++;
+      var st = String(a.status||'').toUpperCase();
+      if (st==='ONLINE'||st==='LIVE'||st==='DEMO') onlineN++;
     });
-
-    var cards = (accounts || []).map(function (a) {
-      var daily = sanitizeDaily(a.daily_profit);
-      var st = String(a.status || '').toUpperCase();
-      var isOn = st === 'ONLINE' || st === 'DEMO' || st === 'LIVE';
-      return '<article class="perf-card">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">' +
-          '<div><h3>' + (a.account_id || a.name || 'Account') + '</h3>' +
-          '<div class="meta">' + (a.broker || a.broker_label || a.name || '') + '</div></div>' +
-          '<span class="badge-st ' + (isOn ? 'on' : 'off') + '">' + (isOn ? 'Online' : 'Offline') + '</span></div>' +
-        '<div class="perf-metrics">' +
-          '<div><span>Equity</span><strong>' + fmt(a.equity) + '</strong></div>' +
-          '<div><span>Balance</span><strong>' + fmt(a.balance) + '</strong></div>' +
-          '<div><span>Daily</span><strong class="' + (daily >= 0 ? 'up' : 'neg') + '">' + fmt(daily) + '</strong></div>' +
-          '<div><span>Total profit</span><strong class="up">' + fmt(a.total_profit) + '</strong></div>' +
-        '</div></article>';
+    var pkgName = { ACC01:'Smart Basic', ACC02:'Smart Gold', ACC03:'Smart Pro' };
+    var cards = accounts.map(function(a){
+      var daily = clampDaily(a.daily_profit);
+      var dailyCls = daily < 0 ? 'neg' : (daily > 0 ? 'up' : '');
+      var sub = [];
+      if (a.login) sub.push('Login '+a.login);
+      if (a.owner) sub.push(a.owner);
+      if (a.server) sub.push(a.server);
+      if (a.broker_label||a.broker) sub.push(a.broker_label||a.broker);
+      return '<div class="perf-card"><div class="top"><h3>'+esc(pkgName[a.account_id]||a.name||a.account_id||'MT5')+'</h3>'+statusBadge(a.status)+'</div>'+
+        '<div style="font-size:1.15rem;font-weight:800;margin-bottom:.2rem">'+esc(a.account_id||'—')+'</div>'+
+        '<div class="meta">'+esc(sub.join(' · ')||'Akun trading')+(a.updated_at?'<br/>Update: '+esc(String(a.updated_at).slice(0,19).replace('T',' ')):'')+'</div>'+
+        '<div class="perf-metrics">'+
+          '<div><span>Balance</span><strong>'+fmt(a.balance)+'</strong></div>'+
+          '<div><span>Equity</span><strong>'+fmt(a.equity)+'</strong></div>'+
+          '<div><span>Daily</span><strong class="'+dailyCls+'">'+fmt(daily)+'</strong></div>'+
+          '<div><span>Total profit</span><strong class="up">'+fmt(a.total_profit)+'</strong></div>'+
+          '<div><span>Deposit awal</span><strong>'+fmt(a.deposit_awal)+'</strong></div>'+
+          '<div><span>Penarikan</span><strong>'+fmt(a.total_penarikan)+'</strong></div></div></div>';
     }).join('');
-
+    var rows = accounts.map(function(a){
+      var daily = clampDaily(a.daily_profit);
+      var dailyCls = daily < 0 ? 'neg' : (daily > 0 ? 'up' : '');
+      var roi = (Number(a.deposit_awal)>0 && Number.isFinite(Number(a.total_profit)))
+        ? ((Number(a.total_profit)/Number(a.deposit_awal))*100).toFixed(1)+'%' : '—';
+      return '<tr><td><b>'+esc(a.account_id)+'</b><div style="font-size:.72rem;color:var(--text-muted)">'+esc(pkgName[a.account_id]||a.name||'')+'</div></td>'+
+        '<td>'+statusBadge(a.status)+'</td><td>'+fmt(a.balance)+'</td><td>'+fmt(a.equity)+'</td>'+
+        '<td class="'+dailyCls+'">'+fmt(daily)+'</td><td class="up">'+fmt(a.total_profit)+'</td>'+
+        '<td>'+fmt(a.total_penarikan)+'</td><td>'+esc(roi)+'</td></tr>';
+    }).join('');
     root.innerHTML =
-      '<div class="page-header"><div><h1>Acc Performance</h1><p>Ringkasan equity &amp; profit semua akun MT5 kamu.</p></div></div>' +
-      '<div class="stat-row">' +
-        '<div class="stat-box"><div class="label">Total equity</div><div class="value">' + fmt(totalEq) + '</div></div>' +
-        '<div class="stat-box"><div class="label">Daily profit</div><div class="value ' + (totalDaily >= 0 ? 'up' : '') + '">' + fmt(totalDaily) + '</div></div>' +
-        '<div class="stat-box"><div class="label">Total profit</div><div class="value up">' + fmt(totalProfit) + '</div></div>' +
-        '<div class="stat-box"><div class="label">Akun online</div><div class="value">' + online + ' / ' + (accounts || []).length + '</div></div>' +
-      '</div>' +
-      '<div class="perf-grid">' + (cards || '<p style="color:var(--text-muted)">Belum ada data akun.</p>') + '</div>';
+      '<div class="perf-hero"><div><h1>Acc Performance</h1><p>Ringkasan equity, profit harian, dan status semua akun MT5 kamu.</p></div>'+
+        (live?'<span class="live-pill"><i></i> Live data</span>':'<span class="live-pill" style="border-color:var(--border);background:rgba(255,255,255,.04);color:var(--text-muted)">Demo / cache</span>')+
+      '</div>'+
+      '<div class="stat-row">'+
+        '<div class="stat-box"><div class="bar"></div><div class="label">Total equity</div><div class="value">'+fmt(totalEq)+'</div><div class="hint">'+accounts.length+' akun</div></div>'+
+        '<div class="stat-box"><div class="bar" style="background:linear-gradient(90deg,var(--green),#34d399)"></div><div class="label">Daily profit</div><div class="value '+(totalDaily>=0?'up':'neg')+'">'+fmt(totalDaily)+'</div><div class="hint">Semua akun · hari ini</div></div>'+
+        '<div class="stat-box"><div class="bar" style="background:linear-gradient(90deg,#60a5fa,#a78bfa)"></div><div class="label">Total profit</div><div class="value up">'+fmt(totalProfit)+'</div><div class="hint">Kumulatif</div></div>'+
+        '<div class="stat-box"><div class="bar" style="background:linear-gradient(90deg,#fbbf24,#f59e0b)"></div><div class="label">Akun online</div><div class="value">'+onlineN+' / '+accounts.length+'</div><div class="hint">Status aktif</div></div>'+
+      '</div>'+
+      (accounts.length?(
+        '<div class="charts-row">'+
+          '<div class="chart-card"><h3>Equity per akun</h3><p class="sub">Perbandingan equity live</p><div class="chart-wrap"><canvas id="chart-equity"></canvas></div></div>'+
+          '<div class="chart-card"><h3>Komposisi equity</h3><p class="sub">Distribusi antar akun</p><div class="chart-wrap sm"><canvas id="chart-pie"></canvas></div></div>'+
+        '</div>'+
+        '<div class="chart-card" style="margin-bottom:1.25rem"><h3>Daily profit per akun</h3><p class="sub">Profit / loss hari ini</p><div class="chart-wrap"><canvas id="chart-daily"></canvas></div></div>'
+      ):'')+
+      '<div class="sec-head"><h2>Detail akun</h2><span class="sub">Balance · equity · profit · ROI</span></div>'+
+      '<div class="perf-grid">'+(cards||'<p style="color:var(--text-muted)">Belum ada data akun.</p>')+'</div>'+
+      (accounts.length?(
+        '<div class="chart-card"><h3>Tabel performa</h3><p class="sub">Ringkasan numerik semua akun</p>'+
+          '<div style="overflow-x:auto"><table class="detail-table"><thead><tr>'+
+            '<th>Akun</th><th>Status</th><th>Balance</th><th>Equity</th><th>Daily</th><th>Total profit</th><th>Penarikan</th><th>ROI</th>'+
+          '</tr></thead><tbody>'+rows+'</tbody></table></div></div>'
+      ):'');
+    if (accounts.length) setTimeout(function(){ buildCharts(accounts); }, 50);
   }
-
   load();
   setInterval(load, 45000);
 })();
