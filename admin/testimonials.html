@@ -3,30 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Testimoni — Smart AI Admin</title>
+  <title>Ulasan & Rating — Smart AI Admin</title>
   <meta name="theme-color" content="#070b14">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/admin.css">
   <script src="../js/theme-init.js"></script>
   <script src="../js/guard.js"></script>
   <style>
-    .mod-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.2rem; margin-bottom: .85rem; }
-    .mod-card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: .5rem; }
-    .mod-card .name { font-weight: 700; }
-    .mod-card .meta { font-size: .78rem; color: var(--text-muted); }
-    .mod-card .stars { color: var(--gold); letter-spacing: 1px; }
-    .mod-card .comment { font-size: .92rem; color: var(--text); margin: .5rem 0 .8rem; line-height: 1.5; }
-    .mod-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
-    .btn-approve { background: rgba(52,211,153,.12); color: var(--green); border: 1px solid rgba(52,211,153,.3); padding: .4rem .85rem; border-radius: 8px; font-weight: 600; font-size: .8rem; cursor: pointer; }
-    .btn-reject { background: rgba(248,113,113,.1); color: var(--red); border: 1px solid rgba(248,113,113,.25); padding: .4rem .85rem; border-radius: 8px; font-weight: 600; font-size: .8rem; cursor: pointer; }
-    .status-pill { font-size: .68rem; font-weight: 700; padding: .2rem .5rem; border-radius: 999px; }
-    .status-pending { background: rgba(251,191,36,.12); color: var(--gold); }
-    .status-approved { background: rgba(52,211,153,.12); color: var(--green); }
-    .status-rejected { background: rgba(248,113,113,.12); color: var(--red); }
-    .empty { text-align: center; padding: 2.5rem; color: var(--text-muted); }
-    .tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
-    .tab { padding: .45rem 1rem; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: .85rem; font-weight: 600; cursor: pointer; }
-    .tab.active { background: rgba(45,212,191,.12); color: var(--cyan); border-color: rgba(45,212,191,.3); }
+    .page-head { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:1.35rem; }
+    .page-head h1 { margin:0 0 .25rem; font-size:1.35rem; font-weight:800; }
+    .page-head p { margin:0; color:var(--text-muted); font-size:.88rem; max-width:520px; }
+    .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.35rem; }
+    @media(max-width:960px){ .stat-grid{ grid-template-columns:1fr 1fr; } }
+    @media(max-width:520px){ .stat-grid{ grid-template-columns:1fr; } }
+    .stat-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:14px;
+      padding:1.05rem 1.15rem; display:flex; align-items:center; gap:.85rem;
+    }
+    .stat-icon {
+      width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+      font-size:1.15rem; flex-shrink:0;
+    }
+    .stat-icon.blue { background:rgba(56,189,248,.12); color:#38bdf8; }
+    .stat-icon.gold { background:rgba(251,191,36,.12); color:#fbbf24; }
+    .stat-icon.red { background:rgba(248,113,113,.12); color:#f87171; }
+    .stat-icon.amber { background:rgba(245,158,11,.12); color:#f59e0b; }
+    .stat-card .label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--text-dim); }
+    .stat-card .value { font-size:1.35rem; font-weight:800; margin-top:.1rem; }
+    .toolbar { display:flex; flex-wrap:wrap; gap:.65rem; align-items:center; margin-bottom:1.1rem; }
+    .toolbar input, .toolbar select {
+      background:var(--input-bg, var(--bg-card)); border:1px solid var(--border); border-radius:10px;
+      color:var(--text); padding:.55rem .85rem; font-size:.85rem; font-family:inherit;
+    }
+    .toolbar input { flex:1; min-width:180px; }
+    .toolbar select { min-width:130px; cursor:pointer; }
+    .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+    .panel-head {
+      display:flex; justify-content:space-between; align-items:center; padding:.9rem 1.15rem;
+      border-bottom:1px solid var(--border); font-weight:700; font-size:.92rem;
+    }
+    .panel-head .count { font-size:.8rem; font-weight:600; color:var(--text-muted); }
+    table.review-table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    table.review-table th {
+      text-align:left; padding:.7rem 1rem; font-size:.68rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.04em; color:var(--text-dim);
+      border-bottom:1px solid var(--border); background:rgba(0,0,0,.15);
+    }
+    table.review-table td { padding:.85rem 1rem; border-bottom:1px solid var(--border); vertical-align:top; }
+    table.review-table tr:last-child td { border-bottom:none; }
+    .member-cell { display:flex; align-items:center; gap:.6rem; }
+    .avatar {
+      width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--cyan),var(--teal));
+      color:#042f2e; font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .member-cell .name { font-weight:700; }
+    .member-cell .sub { font-size:.75rem; color:var(--text-muted); }
+    .stars { color:#fbbf24; letter-spacing:1px; white-space:nowrap; }
+    .comment-cell { max-width:320px; color:var(--text-muted); line-height:1.45; }
+    .status-pill { display:inline-block; font-size:.68rem; font-weight:700; padding:.2rem .55rem; border-radius:999px; }
+    .status-pending { background:rgba(251,191,36,.12); color:#fbbf24; }
+    .status-approved { background:rgba(52,211,153,.12); color:#34d399; }
+    .status-rejected { background:rgba(248,113,113,.12); color:#f87171; }
+    .flag-pill { background:rgba(245,158,11,.12); color:#f59e0b; margin-left:.35rem; }
+    .actions { display:flex; gap:.4rem; flex-wrap:wrap; }
+    .btn-sm {
+      padding:.35rem .7rem; border-radius:8px; font-size:.75rem; font-weight:600; cursor:pointer;
+      border:1px solid transparent; font-family:inherit;
+    }
+    .btn-approve { background:rgba(52,211,153,.12); color:#34d399; border-color:rgba(52,211,153,.25); }
+    .btn-reject { background:rgba(248,113,113,.1); color:#f87171; border-color:rgba(248,113,113,.25); }
+    .btn-del { background:rgba(148,163,184,.08); color:var(--text-muted); border-color:var(--border); }
+    .empty { text-align:center; padding:3rem 1.5rem; color:var(--text-muted); }
+    .btn-reload {
+      display:inline-flex; align-items:center; gap:.4rem; padding:.5rem .95rem; border-radius:10px;
+      border:1px solid var(--border); background:var(--bg-card); color:var(--text); font-size:.82rem;
+      font-weight:600; cursor:pointer; font-family:inherit;
+    }
   </style>
 </head>
 <body>
@@ -43,9 +95,9 @@
         <div class="nav-section">Manajemen</div>
         <a class="nav-item" href="members.html">Members</a>
         <a class="nav-item" href="accounts.html">Trading Accounts</a>
-        <a class="nav-item" href="referrals.html">Referrals</a>
         <a class="nav-item" href="commissions.html">Commissions</a>
-        <a class="nav-item active" href="testimonials.html">Testimoni</a>
+        <a class="nav-item" href="referrals.html">Referrals</a>
+        <a class="nav-item active" href="testimonials.html">Ulasan</a>
         <div class="nav-section">Sistem</div>
         <a class="nav-item" href="settings.html">Settings</a>
       </nav>
@@ -57,89 +109,157 @@
     <div class="main-wrap">
       <header class="topbar">
         <button type="button" class="icon-btn menu-btn" id="menu-btn" aria-label="Menu">☰</button>
-        <div class="topbar-title">Moderasi Testimoni</div>
+        <div class="topbar-title">Ulasan</div>
         <div class="topbar-actions">
-          <a class="btn-ghost-sm" href="../index.html" target="_blank">Landing</a>
+          <a class="btn-ghost-sm" href="../index.html" target="_blank" rel="noopener">Landing</a>
         </div>
       </header>
-      <main class="page-content" style="padding: 1.5rem;">
-        <div class="tabs">
-          <button class="tab active" data-filter="pending">Pending</button>
-          <button class="tab" data-filter="approved">Approved</button>
-          <button class="tab" data-filter="rejected">Rejected</button>
-          <button class="tab" data-filter="all">Semua</button>
+      <main class="page-content" style="padding:1.5rem;">
+        <div class="page-head">
+          <div>
+            <h1>Ulasan & Rating</h1>
+            <p>Saring ulasan dari halaman Testimoni dan hapus yang tidak pantas. · Sumber data: Lokal (demo)</p>
+          </div>
+          <button type="button" class="btn-reload" id="btn-reload">↻ Muat ulang</button>
         </div>
-        <div id="mod-list"></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon blue">💬</div><div><div class="label">Total Ulasan</div><div class="value" id="stat-total">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon gold">★</div><div><div class="label">Rata-rata</div><div class="value" id="stat-avg">—</div></div></div>
+          <div class="stat-card"><div class="stat-icon red">!</div><div><div class="label">Rating 1–2</div><div class="value" id="stat-low">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon amber">⚑</div><div><div class="label">Ditandai kata kasar</div><div class="value" id="stat-flag">0</div></div></div>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="q" placeholder="Cari nama / isi ulasan…">
+          <select id="filter-rating">
+            <option value="">Semua rating</option>
+            <option value="5">5 bintang</option>
+            <option value="4">4 bintang</option>
+            <option value="3">3 bintang</option>
+            <option value="2">2 bintang</option>
+            <option value="1">1 bintang</option>
+          </select>
+          <select id="filter-status">
+            <option value="">Semua status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span>📋 Daftar ulasan</span><span class="count" id="list-count">0 ulasan</span></div>
+          <div id="table-wrap">
+            <table class="review-table">
+              <thead><tr><th>Member</th><th>Rating</th><th>Ulasan</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+              <tbody id="tbody"></tbody>
+            </table>
+            <div class="empty" id="empty" hidden><div style="font-size:2rem;opacity:.4;margin-bottom:.5rem;">📭</div>Tidak ada ulasan ditemukan</div>
+          </div>
+        </div>
       </main>
     </div>
   </div>
   <script src="../js/icons.js"></script>
   <script src="../js/admin.js"></script>
   <script>
-  (function() {
+  (function () {
     const KEY = 'smartai_testimonials';
+    const BAD_WORDS = ['bodoh', 'tolol', 'bangsat', 'anjir', 'kontol', 'memek', 'asu', 'tai', 'jancok', 'setan', 'brengsek', 'bajingan'];
     function getList() {
-      try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { return []; }
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) { return []; }
     }
-    function save(list) { localStorage.setItem(KEY, JSON.stringify(list)); }
-
-    let filter = 'pending';
-    document.querySelectorAll('.tab').forEach(t => {
-      t.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        t.classList.add('active');
-        filter = t.dataset.filter;
-        render();
-      });
-    });
-
+    function saveList(list) { localStorage.setItem(KEY, JSON.stringify(list)); }
     function stars(n) {
+      n = Math.max(0, Math.min(5, Number(n) || 0));
       let s = '';
       for (let i = 1; i <= 5; i++) s += i <= n ? '★' : '☆';
       return s;
     }
-
+    function initials(name) {
+      return String(name || 'SA').split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    }
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function isFlagged(text) {
+      const t = String(text || '').toLowerCase();
+      return BAD_WORDS.some(w => t.includes(w));
+    }
+    function stats(list) {
+      const total = list.length;
+      const avg = total ? (list.reduce((s, c) => s + (Number(c.rating) || 0), 0) / total) : null;
+      const low = list.filter(c => (Number(c.rating) || 0) <= 2).length;
+      const flagged = list.filter(c => isFlagged(c.comment)).length;
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-avg').textContent = avg == null ? '—' : avg.toFixed(1);
+      document.getElementById('stat-low').textContent = low;
+      document.getElementById('stat-flag').textContent = flagged;
+    }
+    function filtered() {
+      let list = getList().slice().reverse();
+      const q = (document.getElementById('q').value || '').trim().toLowerCase();
+      const fr = document.getElementById('filter-rating').value;
+      const fs = document.getElementById('filter-status').value;
+      if (q) list = list.filter(c => String(c.name || '').toLowerCase().includes(q) || String(c.comment || '').toLowerCase().includes(q) || String(c.userId || '').toLowerCase().includes(q));
+      if (fr) list = list.filter(c => String(c.rating) === fr);
+      if (fs) list = list.filter(c => c.status === fs);
+      return list;
+    }
     function render() {
-      const list = getList();
-      const filtered = filter === 'all' ? list : list.filter(c => c.status === filter);
-      const box = document.getElementById('mod-list');
-      if (!filtered.length) {
-        box.innerHTML = '<div class="empty">Tidak ada data untuk filter ini.</div>';
+      const all = getList();
+      stats(all);
+      const list = filtered();
+      const tbody = document.getElementById('tbody');
+      const empty = document.getElementById('empty');
+      const table = tbody.closest('table');
+      document.getElementById('list-count').textContent = list.length + ' ulasan';
+      if (!list.length) {
+        tbody.innerHTML = '';
+        table.hidden = true;
+        empty.hidden = false;
         return;
       }
-      box.innerHTML = filtered.slice().reverse().map(c => `
-        <div class="mod-card">
-          <div class="top">
-            <div>
-              <div class="name">${esc(c.name)} ${c.package ? '· ' + esc(c.package) : ''}</div>
-              <div class="meta">${esc(c.userId || '')} · ${esc(c.createdAt || '')}</div>
-            </div>
-            <span class="status-pill status-${c.status}">${c.status}</span>
-          </div>
-          <div class="stars">${stars(c.rating)}</div>
-          <div class="comment">"${esc(c.comment)}"</div>
-          <div class="mod-actions">
-            ${c.status !== 'approved' ? `<button class="btn-approve" data-id="${c.id}" data-act="approved">Approve</button>` : ''}
-            ${c.status !== 'rejected' ? `<button class="btn-reject" data-id="${c.id}" data-act="rejected">Reject</button>` : ''}
-          </div>
-        </div>
-      `).join('');
-
-      box.querySelectorAll('[data-act]').forEach(btn => {
+      table.hidden = false;
+      empty.hidden = true;
+      tbody.innerHTML = list.map(c => {
+        const flag = isFlagged(c.comment);
+        return '<tr data-id="' + esc(c.id) + '">' +
+          '<td><div class="member-cell"><div class="avatar">' + esc(initials(c.name)) + '</div><div><div class="name">' + esc(c.name || 'Member') + '</div><div class="sub">' + esc(c.package || c.userId || '') + '</div></div></div></td>' +
+          '<td><span class="stars">' + stars(c.rating) + '</span></td>' +
+          '<td class="comment-cell">"' + esc(c.comment) + '"' + (flag ? ' <span class="status-pill flag-pill">kata kasar</span>' : '') + '</td>' +
+          '<td><span class="status-pill status-' + esc(c.status || 'pending') + '">' + esc(c.status || 'pending') + '</span></td>' +
+          '<td style="white-space:nowrap;color:var(--text-muted);font-size:.82rem">' + esc(c.createdAt || '—') + '</td>' +
+          '<td><div class="actions">' +
+            (c.status !== 'approved' ? '<button type="button" class="btn-sm btn-approve" data-act="approved" data-id="' + esc(c.id) + '">Approve</button>' : '') +
+            (c.status !== 'rejected' ? '<button type="button" class="btn-sm btn-reject" data-act="rejected" data-id="' + esc(c.id) + '">Reject</button>' : '') +
+            '<button type="button" class="btn-sm btn-del" data-act="delete" data-id="' + esc(c.id) + '">Hapus</button>' +
+          '</div></td></tr>';
+      }).join('');
+      tbody.querySelectorAll('[data-act]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
           const act = btn.dataset.act;
-          const list = getList();
-          const item = list.find(x => x.id === id);
-          if (item) { item.status = act; save(list); render(); }
+          let list = getList();
+          if (act === 'delete') {
+            if (!confirm('Hapus ulasan ini permanen?')) return;
+            list = list.filter(x => x.id !== id);
+          } else {
+            const item = list.find(x => x.id === id);
+            if (item) item.status = act;
+          }
+          saveList(list);
+          render();
         });
       });
     }
-
-    function esc(s) {
-      return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
+    document.getElementById('q').addEventListener('input', render);
+    document.getElementById('filter-rating').addEventListener('change', render);
+    document.getElementById('filter-status').addEventListener('change', render);
+    document.getElementById('btn-reload').addEventListener('click', render);
     render();
   })();
   </script>
