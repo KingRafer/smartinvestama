@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Sign Up — Smart AI</title>
+  <meta name="description" content="Daftar akun member Smart AI. Mulai trading dengan EA otomatis, pantau performa, dan raih komisi referral."/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="index.html"/>
+  <meta name="theme-color" content="#050a12"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme=dark] {
+      --bg: #040810;
+      --bg-card: rgba(12, 18, 32, 0.85);
+      --border: rgba(148, 163, 184, 0.14);
+      --cyan: #2dd4bf;
+      --teal: #14b8a6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --green: #34d399;
+      --glow: rgba(45, 212, 191, 0.22);
+      --shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.65);
+    }
+    [data-theme=light] {
+      --bg: #e8eef6;
+      --bg-card: rgba(255, 255, 255, 0.92);
+      --border: rgba(15, 23, 42, 0.08);
+      --cyan: #0f766e;
+      --teal: #0d9488;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --green: #059669;
+      --glow: rgba(13, 148, 136, 0.15);
+      --shadow: 0 25px 50px -20px rgba(15, 23, 42, 0.15);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem; position: relative; overflow-x: hidden;
+    }
+    body::before, body::after {
+      content: ''; position: fixed; border-radius: 50%; filter: blur(80px);
+      pointer-events: none; z-index: 0;
+    }
+    body::before {
+      width: 420px; height: 420px; top: -80px; left: -60px;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.18), transparent 70%);
+    }
+    body::after {
+      width: 380px; height: 380px; bottom: -100px; right: -40px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.14), transparent 70%);
+    }
+    .auth-shell { width: 100%; max-width: 440px; position: relative; z-index: 1; animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    .logo { text-align: center; font-size: 1.55rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1.4rem; text-decoration: none; color: var(--text); display: block; }
+    .logo span { background: linear-gradient(135deg, var(--cyan), #5eead4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .card {
+      background: var(--bg-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 22px; padding: 1.75rem 1.6rem 1.5rem;
+      box-shadow: var(--shadow); position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.45), transparent);
+    }
+    .card h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; text-align: center; }
+    .card .sub { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem; }
+    .form-group { margin-bottom: 0.95rem; }
+    .form-group label { display: block; font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .form-group input {
+      width: 100%; background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px; padding: 0.75rem 1rem; color: var(--text); font-size: 15px;
+      font-family: inherit; outline: none; min-height: 46px;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    [data-theme=light] .form-group input { background: rgba(15, 23, 42, 0.03); border-color: rgba(15, 23, 42, 0.1); }
+    .form-group input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--glow); }
+    .btn-primary {
+      width: 100%; margin-top: 0.4rem; padding: 0.9rem; border: none; border-radius: 12px;
+      font-weight: 700; font-size: 0.95rem; font-family: inherit; cursor: pointer;
+      background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0d9488 100%);
+      color: #042f2e; min-height: 48px; box-shadow: 0 8px 24px rgba(45, 212, 191, 0.28);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(45, 212, 191, 0.35); }
+    .btn-primary:disabled { opacity: 0.65; cursor: wait; }
+    .msg { display: none; margin-top: 0.85rem; padding: 0.65rem 0.9rem; border-radius: 10px; font-size: 0.82rem; }
+    .msg.show { display: block; }
+    .msg.error { background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.25); color: #f87171; }
+    .msg.success { background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.25); color: var(--green); }
+    .foot { text-align: center; margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-dim); }
+    .foot a { color: var(--cyan); font-weight: 600; text-decoration: none; }
+    .theme-btn {
+      position: fixed; top: 1.1rem; right: 1.1rem; width: 42px; height: 42px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; z-index: 10;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.35rem; color: var(--text-muted);
+      text-decoration: none; font-size: 0.82rem; font-weight: 600; margin-bottom: 1rem;
+    }
+    .back-link:hover { color: var(--cyan); }
+  </style>
+</head>
+<body>
+  <button type="button" class="theme-btn" id="theme-toggle" aria-label="Tema">◐</button>
+  <div class="auth-shell">
+    <a href="index.html" class="back-link">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Kembali ke Beranda
+    </a>
+    <a href="index.html" class="logo">SMART<span>AI</span></a>
+    <div class="card">
+      <h1>Sign Up</h1>
+      <p class="sub">Buat akun member Smart AI</p>
+      <form id="signup-form" novalidate>
+        <div class="form-group">
+          <label for="nama">Nama Lengkap</label>
+          <input type="text" id="nama" name="nama" placeholder="Nama Anda" required autocomplete="name"/>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="email@contoh.com" required autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label for="hp">No. WhatsApp</label>
+          <input type="tel" id="hp" name="hp" placeholder="08xxxxxxxxxx" required autocomplete="tel"/>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Minimal 6 karakter" required autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label for="password2">Ulangi Password</label>
+          <input type="password" id="password2" name="password2" placeholder="Ulangi password" required autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label for="ref">Kode Referral (opsional)</label>
+          <input type="text" id="ref" name="ref" placeholder="SMARTAI-REF" autocomplete="off"/>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-submit">Daftar Sekarang</button>
+      </form>
+      <div id="msg" class="msg"></div>
+      <p class="foot">Sudah punya akun? <a href="index.html">Login</a></p>
+    </div>
+  </div>
+  <script src="js/auth.js"></script>
+  <script>
+  (function () {
+    var html = document.documentElement;
+    var themeBtn = document.getElementById('theme-toggle');
+    try {
+      var saved = localStorage.getItem('smartai_theme') || localStorage.getItem('theme');
+      if (saved) html.setAttribute('data-theme', saved);
+    } catch (e) {}
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function () {
+        var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        try { localStorage.setItem('smartai_theme', next); localStorage.setItem('theme', next); } catch (e) {}
+      });
+    }
+    // Pre-fill referral from URL
+    try {
+      var params = new URLSearchParams(location.search);
+      var ref = params.get('ref');
+      if (ref) document.getElementById('ref').value = ref;
+    } catch (e) {}
+    var form = document.getElementById('signup-form');
+    var msg = document.getElementById('msg');
+    var btn = document.getElementById('btn-submit');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var nama = (document.getElementById('nama').value || '').trim();
+      var email = (document.getElementById('email').value || '').trim();
+      var hp = (document.getElementById('hp').value || '').trim();
+      var pass = document.getElementById('password').value || '';
+      var pass2 = document.getElementById('password2').value || '';
+      var referral = (document.getElementById('ref').value || '').trim() || 'SMARTAI-REF';
+      if (!nama || !email || !hp || pass.length < 6) {
+        msg.className = 'msg show error';
+        msg.textContent = 'Lengkapi semua data. Password minimal 6 karakter.';
+        return;
+      }
+      if (pass !== pass2) {
+        msg.className = 'msg show error';
+        msg.textContent = 'Password tidak sama.';
+        return;
+      }
+      btn.disabled = true;
+      var session = { nama: nama, email: email, hp: hp, referral: referral.toUpperCase(), avatar: null };
+      try {
+        localStorage.setItem('smartai_user', JSON.stringify(session));
+        if (typeof registerUser === 'function') registerUser(session, pass);
+      } catch (err) {}
+      msg.className = 'msg show success';
+      msg.textContent = 'Pendaftaran berhasil. Mengalihkan ke dashboard...';
+      setTimeout(function () { location.href = 'member/dashboard.html'; }, 600);
+    });
+  })();
+  </script>
+</body>
+</html>
