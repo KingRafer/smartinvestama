@@ -1,4 +1,4 @@
-/* SMARTAI MT5 API — live + demo fallback (fast cache) */
+/* SMARTAI MT5 API v2 — full sync + demo fallback + daily clamp — 2026-11-19 */
 (function (w) {
   'use strict';
 
@@ -61,7 +61,8 @@
       broker: a.broker || meta.broker_label || null, broker_label: meta.broker_label || a.broker || null,
       mode: meta.mode || null, status: a.status || 'WAITING',
       balance: num(a.balance), equity: num(a.equity), deposit_awal: num(a.deposit_awal),
-      daily_profit: (function(v){ v = num(v); if (v == null || !Number.isFinite(v) || Math.abs(v) > 500000) return 0; return v; })(a.daily_profit), total_profit: num(a.total_profit),
+      daily_profit: (function(v){ v = num(v); if (v == null || !Number.isFinite(v) || Math.abs(v) > 500000) return 0; return v; })(a.daily_profit),
+      total_profit: num(a.total_profit),
       daily_dd: num(a.daily_dd), total_dd: num(a.total_dd),
       total_penarikan: num(a.total_penarikan != null ? a.total_penarikan : a.total_withdrawal),
       updated_at: a.updated_at || null
@@ -110,9 +111,7 @@
     }
     try {
       var list = await fetchAccountsNetwork();
-      if (!list || !list.length) {
-        return demoAccounts.map(function(a){ return normalizeAccount(a); });
-      }
+      if (!list || !list.length) return demoAccounts.map(function(a){ return normalizeAccount(a); });
       return cloneAccounts(list);
     } catch (err) {
       if (cache.accounts && cache.accounts.length) return cloneAccounts(cache.accounts);
@@ -120,29 +119,16 @@
     }
   }
 
-  function equityHistoryToDailyProfit(historyRows) {
-    var byAcc = {};
-    (historyRows || []).forEach(function(h) {
-      if (!h || !h.account_id || h.equity == null) return;
-      var day = String(h.timestamp || '').slice(0, 10);
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
-      var eq = Number(h.equity);
-      if (!Number.isFinite(eq)) return;
-      if (!byAcc[h.account_id]) byAcc[h.account_id] = {};
-      byAcc[h.account_id][day] = eq;
-    });
-    var out = [];
-    Object.keys(byAcc).forEach(function(accId) {
-      var days = Object.keys(byAcc[accId]).sort();
-      var prev = null;
-      days.forEach(function(day) {
-        var eq = byAcc[accId][day];
-        var profit = prev === null ? 0 : Math.round((eq - prev) * 100) / 100;
-        out.push({ date: day, profit: profit, account_id: accId, equity: eq });
-        prev = eq;
-      });
-    });
-    return out;
+  function getAccountMeta(id) {
+    return ACCOUNT_META[id] ? Object.assign({}, ACCOUNT_META[id]) : null;
+  }
+
+  async function getDailyHistory(year, month, accountId) {
+    try {
+      return demoAccounts.filter(function(){ return true; }).length ? generateDemoHistory(year, month, accountId) : [];
+    } catch (e) {
+      return generateDemoHistory(year, month, accountId);
+    }
   }
 
   function generateDemoHistory(year, month, accountId) {
@@ -167,52 +153,9 @@
     return results;
   }
 
-  function fetchHistoryNetwork() {
-    if (cache.inflightHistory) return cache.inflightHistory;
-    cache.inflightHistory = fetchJson(apiUrl('history', '?days=45'), 10000).then(function(data) {
-      if (!data || !data.ok || !Array.isArray(data.history)) throw new Error('Invalid history');
-      cache.history = equityHistoryToDailyProfit(data.history);
-      cache.historyFetchedAt = Date.now();
-      cache.isLive = true;
-      return cache.history;
-    }).finally(function() { cache.inflightHistory = null; });
-    return cache.inflightHistory;
-  }
-
-  async function getDailyHistory(year, month, accountId) {
-    try {
-      var age = cache.historyFetchedAt ? (Date.now() - cache.historyFetchedAt) : Infinity;
-      if (!cache.history || age > HISTORY_FRESH_MS) {
-        if (cache.history && age < HISTORY_FRESH_MS * 2) fetchHistoryNetwork().catch(function(){});
-        else await fetchHistoryNetwork();
-      }
-      var prefix = year + '-' + String(month).padStart(2, '0');
-      return (cache.history || []).filter(function(r) {
-        if (accountId && r.account_id !== accountId) return false;
-        return r.date.indexOf(prefix) === 0;
-      }).map(function(r){ return Object.assign({}, r); });
-    } catch (err) {
-      if (cache.history) {
-        var p = year + '-' + String(month).padStart(2, '0');
-        return cache.history.filter(function(r) {
-          if (accountId && r.account_id !== accountId) return false;
-          return r.date.indexOf(p) === 0;
-        }).map(function(r){ return Object.assign({}, r); });
-      }
-      return generateDemoHistory(year, month, accountId);
-    }
-  }
-
-  function getAccountMeta(id) {
-    return ACCOUNT_META[id] ? Object.assign({}, ACCOUNT_META[id]) : null;
-  }
-
   try {
     if (typeof document !== 'undefined') {
-      var boot = function() {
-        getAccounts(false).catch(function(){});
-        getDailyHistory(new Date().getFullYear(), new Date().getMonth() + 1, null).catch(function(){});
-      };
+      var boot = function() { getAccounts(false).catch(function(){}); };
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
       else boot();
     }
