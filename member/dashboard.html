@@ -6,96 +6,223 @@
 <meta name="theme-color" content="#060b14"/>
 <title>Dashboard — Smart AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/app.css?v=20261119v2">
+<link rel="stylesheet" href="../css/app.css?v=20261119p">
+<style>
+.dash-hero{margin-bottom:1.2rem}
+.dash-hero h1{margin:0 0 .25rem;font-size:1.45rem;font-weight:800}
+.dash-hero p{margin:0;color:var(--text-muted);font-size:.88rem}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem}
+@media(max-width:900px){.stat-row{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.stat-row{grid-template-columns:1fr}}
+.stat-box{background:var(--bg-card-solid);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.2rem;position:relative;overflow:hidden}
+.stat-box .bar{position:absolute;left:0;top:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--teal))}
+.stat-box .label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:.3rem}
+.stat-box .value{font-size:1.3rem;font-weight:800}
+.stat-box .value.up{color:var(--green)}
+.stat-box .value.neg{color:#f87171}
+.stat-box .hint{font-size:.72rem;color:var(--text-muted);margin-top:.25rem}
+.charts-row{display:grid;grid-template-columns:1.35fr 1fr;gap:1.15rem;margin-bottom:1.25rem}
+@media(max-width:960px){.charts-row{grid-template-columns:1fr}}
+.chart-card{background:var(--bg-card-solid);border:1px solid var(--border);border-radius:16px;padding:1.15rem 1.25rem}
+.chart-card h3{margin:0 0 .15rem;font-size:.95rem;font-weight:800}
+.chart-card .sub{font-size:.75rem;color:var(--text-muted);margin-bottom:1rem}
+.chart-wrap{position:relative;height:220px}
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:1.25rem}
+.acc-card{border:1px solid var(--border);border-radius:16px;padding:1.15rem;background:var(--bg-card-solid)}
+.acc-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.45rem}
+.acc-card .pkg{font-size:.68rem;font-weight:800;color:var(--cyan);text-transform:uppercase}
+.acc-card .aid{font-size:1.15rem;font-weight:800}
+.acc-card .meta{font-size:.75rem;color:var(--text-muted);margin:.2rem 0 .75rem}
+.acc-metrics{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.acc-metrics div{padding:.5rem .6rem;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
+.acc-metrics span{display:block;font-size:.62rem;color:var(--text-dim);text-transform:uppercase}
+.acc-metrics strong{font-size:.88rem}
+.acc-daily{margin-top:.75rem;text-align:center;font-weight:800;color:var(--cyan)}
+.acc-daily.neg{color:#f87171}
+.badge-on{font-size:.65rem;font-weight:700;color:var(--green)}
+.badge-off{font-size:.65rem;font-weight:700;color:var(--text-muted)}
+.ref-bar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card-solid);margin-bottom:1.25rem}
+.ref-bar code{font-weight:800;color:var(--cyan);padding:.35rem .7rem;border-radius:8px;background:rgba(45,212,191,.1)}
+.ref-bar button,.ref-bar a{cursor:pointer;padding:.4rem .85rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:.8rem;font-weight:600;text-decoration:none}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.15rem}
+@media(max-width:800px){.bottom-grid{grid-template-columns:1fr}}
+.panel{background:var(--bg-card-solid);border:1px solid var(--border);border-radius:16px;padding:1.15rem 1.25rem}
+.panel h3{margin:0 0 .85rem;font-size:.95rem;font-weight:800}
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.qa a{display:flex;align-items:center;gap:.4rem;padding:.65rem .75rem;border-radius:12px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:.8rem;font-weight:600}
+.qa a:hover{border-color:rgba(45,212,191,.4);color:var(--cyan)}
+.live-pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:var(--green);margin-left:.5rem}
+.live-pill i{width:6px;height:6px;border-radius:50%;background:var(--green)}
+</style>
 <script>try{var t=localStorage.getItem('smartai_theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 </head>
 <body>
-<script src="../js/auth.js?v=20261119v2"></script>
-<script src="../js/app.js?v=20261119v2"></script>
+<script src="../js/auth.js?v=20261119p"></script>
+<script src="../js/app.js?v=20261119p"></script>
 <script src="../js/mt5-api-v2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 const user = renderShell('dashboard');
 if (user) {
   var root = document.getElementById('page-content');
-  root.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted)">Memuat dashboard…</div>';
+  root.innerHTML = '<div style="padding:2.5rem;text-align:center;color:var(--text-muted)">Memuat dashboard…</div>';
+  var equityChart = null, dailyChart = null;
+  function fmt(n) {
+    if (window.SmartAIMT5 && SmartAIMT5.formatUSD) return SmartAIMT5.formatUSD(n);
+    if (!Number.isFinite(Number(n))) return '—';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(Number(n));
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function clampDaily(n) {
+    n = Number(n);
+    if (!Number.isFinite(n) || Math.abs(n) > 500000) return 0;
+    return n;
+  }
+  function greeting() {
+    var h = new Date().getHours();
+    if (h < 11) return 'Selamat pagi';
+    if (h < 15) return 'Selamat siang';
+    if (h < 18) return 'Selamat sore';
+    return 'Selamat malam';
+  }
   function copyText(text, btn) {
-    function ok() { var old = btn.textContent; btn.textContent = 'Tersalin ✓'; setTimeout(function () { btn.textContent = old; }, 1600); }
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok).catch(function(){});
+    function ok() { var o = btn.textContent; btn.textContent = 'Tersalin ✓'; setTimeout(function(){ btn.textContent = o; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok).catch(ok);
     else ok();
   }
-  function greeting() { var h = new Date().getHours(); if (h < 11) return 'Selamat pagi'; if (h < 15) return 'Selamat siang'; if (h < 18) return 'Selamat sore'; return 'Selamat malam'; }
+  function chartColors() {
+    var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+    return {
+      text: dark ? 'rgba(148,163,184,.9)' : 'rgba(71,85,105,.9)',
+      grid: dark ? 'rgba(148,163,184,.12)' : 'rgba(71,85,105,.12)',
+      cyan: 'rgba(45,212,191,.9)', green: 'rgba(52,211,153,.9)',
+      gold: 'rgba(251,191,36,.9)', purple: 'rgba(167,139,250,.9)', blue: 'rgba(96,165,250,.9)'
+    };
+  }
+  function buildCharts(accounts) {
+    if (!window.Chart || !accounts.length) return;
+    var c = chartColors();
+    var labels = accounts.map(function(a){ return a.account_id || '—'; });
+    var equities = accounts.map(function(a){ return Number(a.equity)||0; });
+    var dailies = accounts.map(function(a){ return clampDaily(a.daily_profit); });
+    var palette = [c.cyan, c.gold, c.purple, c.blue, c.green];
+    if (equityChart) equityChart.destroy();
+    if (dailyChart) dailyChart.destroy();
+    var eqEl = document.getElementById('dash-chart-equity');
+    var dyEl = document.getElementById('dash-chart-daily');
+    if (!eqEl) return;
+    equityChart = new Chart(eqEl, {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ data: equities, backgroundColor: labels.map(function(_,i){return palette[i%palette.length];}), borderRadius: 8, maxBarThickness: 44 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(x){ return fmt(x.raw); } } } },
+        scales: {
+          x: { ticks: { color: c.text }, grid: { display: false } },
+          y: { ticks: { color: c.text, callback: function(v){ return '$'+Number(v).toLocaleString(); } }, grid: { color: c.grid } }
+        }
+      }
+    });
+    if (dyEl) {
+      dailyChart = new Chart(dyEl, {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ data: dailies, backgroundColor: dailies.map(function(v){return v>=0?c.green:'rgba(248,113,113,.85)';}), borderRadius: 8, maxBarThickness: 44 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(x){ return fmt(x.raw); } } } },
+          scales: {
+            x: { ticks: { color: c.text }, grid: { display: false } },
+            y: { ticks: { color: c.text, callback: function(v){ return '$'+Number(v).toLocaleString(); } }, grid: { color: c.grid } }
+          }
+        }
+      });
+    }
+  }
   async function loadDash() {
     var accounts = [];
     try {
       if (typeof SmartAIMT5 !== 'undefined' && SmartAIMT5.getAccounts) {
         accounts = await SmartAIMT5.getAccounts(true);
-        if ((!accounts || !accounts.length)) {
-          await new Promise(function(r){ setTimeout(r, 600); });
+        if (!accounts || !accounts.length) {
+          await new Promise(function(r){ setTimeout(r, 700); });
           accounts = await SmartAIMT5.getAccounts(true);
         }
       }
     } catch (e) { accounts = []; }
     accounts = accounts || [];
-    accounts.sort(function (a, b) { return String(a.account_id || '').localeCompare(String(b.account_id || '')); });
+    accounts.sort(function(a,b){ return String(a.account_id||'').localeCompare(String(b.account_id||'')); });
     var live = (typeof SmartAIMT5 !== 'undefined' && SmartAIMT5.isLive) ? SmartAIMT5.isLive() : false;
-    var totalEq = 0, totalDaily = 0, totalProfit = 0, totalWd = 0, onlineN = 0;
-    accounts.forEach(function (a) {
+    var totalEq=0, totalDaily=0, totalProfit=0, totalWd=0, onlineN=0;
+    accounts.forEach(function(a){
       if (Number.isFinite(Number(a.equity))) totalEq += Number(a.equity);
-      var _d = Number(a.daily_profit);
-      if (Number.isFinite(_d) && Math.abs(_d) < 500000) totalDaily += _d;
+      totalDaily += clampDaily(a.daily_profit);
       if (Number.isFinite(Number(a.total_profit))) totalProfit += Number(a.total_profit);
       if (Number.isFinite(Number(a.total_penarikan))) totalWd += Number(a.total_penarikan);
-      var st = String(a.status || '').toUpperCase();
-      if (st === 'ONLINE' || st === 'DEMO' || st === 'LIVE') onlineN++;
+      var st = String(a.status||'').toUpperCase();
+      if (st==='ONLINE'||st==='LIVE'||st==='DEMO') onlineN++;
     });
     var refCode = (user.referral && String(user.referral).trim()) ? String(user.referral).trim().toUpperCase() : 'SMARTAI-REF';
     var refLink = location.origin + location.pathname.replace(/\/member\/.*$/, '/') + 'daftar.html?ref=' + encodeURIComponent(refCode);
-    var pkgName = { ACC01: 'Smart Basic', ACC02: 'Smart Gold', ACC03: 'Smart Pro' };
-    var fmt = (typeof SmartAIMT5 !== 'undefined' && SmartAIMT5.formatUSD) ? SmartAIMT5.formatUSD : function (n) {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n || 0);
-    };
-    var firstName = String(user.nama || 'Member').trim().split(/\s+/)[0];
-    var cards = accounts.map(function (a) {
-      var on = /ONLINE|DEMO|LIVE/i.test(String(a.status || ''));
-      var daily = Number(a.daily_profit);
-      var dailyNeg = Number.isFinite(daily) && daily < 0;
+    var pkgName = { ACC01:'Smart Basic', ACC02:'Smart Gold', ACC03:'Smart Pro' };
+    var firstName = String(user.nama||'Member').trim().split(/\s+/)[0];
+    var cards = accounts.map(function(a){
+      var daily = clampDaily(a.daily_profit);
+      var on = /ONLINE|LIVE|DEMO/i.test(String(a.status||''));
       var sub = [];
-      if (a.login) sub.push('Login ' + a.login);
-      if (a.broker_label || a.broker) sub.push(a.broker_label || a.broker);
-      return '<div style="border:1px solid var(--border);border-radius:16px;padding:1.1rem;background:var(--bg-card-solid)">' +
-        '<div style="display:flex;justify-content:space-between;margin-bottom:.5rem">' +
-          '<span style="font-size:.7rem;font-weight:800;color:var(--cyan)">' + escapeHtml(pkgName[a.account_id] || a.name || 'MT5') + '</span>' +
-          '<span style="font-size:.65rem;font-weight:700;color:' + (on ? 'var(--green)' : 'var(--text-muted)') + '">' + escapeHtml(a.status || '—') + '</span></div>' +
-        '<div style="font-size:1.15rem;font-weight:800">' + escapeHtml(a.account_id || '—') + '</div>' +
-        '<div style="font-size:.72rem;color:var(--text-muted);margin:.25rem 0 .75rem">' + escapeHtml(sub.join(' · ') || 'Akun trading') + '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">' +
-          '<div style="padding:.5rem;border-radius:10px;border:1px solid var(--border)"><div style="font-size:.62rem;color:var(--text-dim)">Balance</div><strong>' + fmt(a.balance) + '</strong></div>' +
-          '<div style="padding:.5rem;border-radius:10px;border:1px solid var(--border)"><div style="font-size:.62rem;color:var(--text-dim)">Equity</div><strong>' + fmt(a.equity) + '</strong></div>' +
-          '<div style="padding:.5rem;border-radius:10px;border:1px solid var(--border)"><div style="font-size:.62rem;color:var(--text-dim)">Profit</div><strong>' + fmt(a.total_profit) + '</strong></div>' +
-          '<div style="padding:.5rem;border-radius:10px;border:1px solid var(--border)"><div style="font-size:.62rem;color:var(--text-dim)">Penarikan</div><strong>' + fmt(a.total_penarikan) + '</strong></div>' +
-        '</div>' +
-        '<div style="margin-top:.75rem;text-align:center;font-weight:800;color:' + (dailyNeg ? 'var(--red)' : 'var(--cyan)') + '">Daily ' + fmt(a.daily_profit) + '</div></div>';
+      if (a.login) sub.push('Login '+a.login);
+      if (a.broker_label||a.broker) sub.push(a.broker_label||a.broker);
+      return '<div class="acc-card"><div class="top"><span class="pkg">'+esc(pkgName[a.account_id]||a.name||'MT5')+'</span>'+
+        '<span class="'+(on?'badge-on':'badge-off')+'">'+(on?'● Online':'● Offline')+'</span></div>'+
+        '<div class="aid">'+esc(a.account_id||'—')+'</div><div class="meta">'+esc(sub.join(' · ')||'Akun trading')+'</div>'+
+        '<div class="acc-metrics">'+
+          '<div><span>Balance</span><strong>'+fmt(a.balance)+'</strong></div>'+
+          '<div><span>Equity</span><strong>'+fmt(a.equity)+'</strong></div>'+
+          '<div><span>Profit</span><strong>'+fmt(a.total_profit)+'</strong></div>'+
+          '<div><span>Penarikan</span><strong>'+fmt(a.total_penarikan)+'</strong></div></div>'+
+        '<div class="acc-daily'+(daily<0?' neg':'')+'">Daily '+fmt(daily)+'</div></div>';
     }).join('');
-    if (!cards) cards = '<div style="padding:1.5rem;text-align:center;color:var(--text-muted);border:1px solid var(--border);border-radius:16px">Belum ada data akun MT5.</div>';
     root.innerHTML =
-      '<div style="margin-bottom:1.25rem"><h1 style="margin:0;font-size:1.4rem">' + escapeHtml(greeting()) + ', ' + escapeHtml(firstName) + '</h1>' +
-        '<p style="color:var(--text-muted);margin:.35rem 0 0">' + accounts.length + ' akun terhubung · ' + onlineN + ' online' + (live ? ' · <span style="color:var(--green)">Live</span>' : '') + '</p></div>' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-bottom:1.25rem">' +
-        '<div style="background:var(--bg-card-solid);border:1px solid var(--border);border-radius:14px;padding:1rem"><div style="font-size:.7rem;color:var(--text-dim)">Total equity</div><div style="font-size:1.2rem;font-weight:800">' + fmt(totalEq) + '</div></div>' +
-        '<div style="background:var(--bg-card-solid);border:1px solid var(--border);border-radius:14px;padding:1rem"><div style="font-size:.7rem;color:var(--text-dim)">Daily profit</div><div style="font-size:1.2rem;font-weight:800;color:' + (totalDaily>=0?'var(--green)':'var(--red)') + '">' + fmt(totalDaily) + '</div></div>' +
-        '<div style="background:var(--bg-card-solid);border:1px solid var(--border);border-radius:14px;padding:1rem"><div style="font-size:.7rem;color:var(--text-dim)">Total profit</div><div style="font-size:1.2rem;font-weight:800;color:var(--green)">' + fmt(totalProfit) + '</div></div>' +
-        '<div style="background:var(--bg-card-solid);border:1px solid var(--border);border-radius:14px;padding:1rem"><div style="font-size:.7rem;color:var(--text-dim)">Penarikan</div><div style="font-size:1.2rem;font-weight:800">' + fmt(totalWd) + '</div></div></div>' +
-      '<h2 style="font-size:1rem;margin:0 0 .9rem">Akun MT5</h2>' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;margin-bottom:1.25rem">' + cards + '</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:1rem;border:1px solid var(--border);border-radius:14px;background:var(--bg-card-solid)">' +
-        '<strong style="color:var(--cyan)">' + escapeHtml(refCode) + '</strong>' +
-        '<button type="button" id="dash-copy-code" style="cursor:pointer;padding:.4rem .8rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text)">Salin kode</button>' +
-        '<button type="button" id="dash-copy-link" style="cursor:pointer;padding:.4rem .8rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text)">Salin link</button>' +
-        '<a href="referral.html" style="color:var(--cyan)">Network →</a></div>';
+      '<div class="dash-hero"><h1>'+esc(greeting())+', '+esc(firstName)+
+        (live?' <span class="live-pill"><i></i> Live</span>':'')+'</h1>'+
+        '<p>'+accounts.length+' akun terhubung · '+onlineN+' online · pantau equity & profit real-time</p></div>'+
+      '<div class="stat-row">'+
+        '<div class="stat-box"><div class="bar"></div><div class="label">Total equity</div><div class="value">'+fmt(totalEq)+'</div><div class="hint">'+accounts.length+' akun</div></div>'+
+        '<div class="stat-box"><div class="bar" style="background:linear-gradient(90deg,var(--green),#34d399)"></div><div class="label">Daily profit</div><div class="value '+(totalDaily>=0?'up':'neg')+'">'+fmt(totalDaily)+'</div><div class="hint">Hari ini</div></div>'+
+        '<div class="stat-box"><div class="bar" style="background:linear-gradient(90deg,#60a5fa,#a78bfa)"></div><div class="label">Total profit</div><div class="value up">'+fmt(totalProfit)+'</div><div class="hint">Kumulatif</div></div>'+
+        '<div class="stat-box"><div class="bar" style="background:linear-gradient(90deg,#fbbf24,#f59e0b)"></div><div class="label">Penarikan</div><div class="value">'+fmt(totalWd)+'</div><div class="hint">Semua akun</div></div></div>'+
+      '<div class="ref-bar"><code id="dash-ref-code">'+esc(refCode)+'</code>'+
+        '<button type="button" id="dash-copy-code">Salin kode</button>'+
+        '<button type="button" id="dash-copy-link">Salin link</button>'+
+        '<a href="referral.html">Network →</a></div>'+
+      (accounts.length?(
+        '<div class="charts-row">'+
+          '<div class="chart-card"><h3>Equity per akun</h3><p class="sub">Perbandingan equity live</p><div class="chart-wrap"><canvas id="dash-chart-equity"></canvas></div></div>'+
+          '<div class="chart-card"><h3>Daily profit</h3><p class="sub">Profit / loss hari ini</p><div class="chart-wrap"><canvas id="dash-chart-daily"></canvas></div></div>'+
+        '</div>'
+      ):'')+
+      '<h2 style="font-size:1rem;margin:0 0 .9rem">Akun MT5</h2>'+
+      '<div class="acc-grid">'+(cards||'<div style="padding:1.5rem;color:var(--text-muted);border:1px solid var(--border);border-radius:16px">Belum ada data akun MT5.</div>')+'</div>'+
+      '<div class="bottom-grid">'+
+        '<div class="panel"><h3>Profil member</h3>'+
+          '<div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.85rem">'+
+            '<div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--teal));display:flex;align-items:center;justify-content:center;font-weight:800;color:#042f2e">'+esc((user.nama||'SA').split(/\s+/).map(function(p){return p[0];}).join('').slice(0,2).toUpperCase())+'</div>'+
+            '<div><b>'+esc(user.nama||'Member')+'</b><div style="font-size:.78rem;color:var(--text-muted)">'+esc(user.email||'')+'</div></div></div>'+
+          '<div style="font-size:.85rem;color:var(--text-muted)">WhatsApp: <b style="color:var(--text)">'+esc(user.hp||'—')+'</b></div>'+
+          '<div style="font-size:.85rem;color:var(--text-muted);margin-top:.35rem">Referral: <b style="color:var(--cyan)">'+esc(refCode)+'</b></div></div>'+
+        '<div class="panel"><h3>Quick access</h3><div class="qa">'+
+          '<a href="ea-performance.html">Acc Performance</a>'+
+          '<a href="trading-report.html">Trading Report</a>'+
+          '<a href="commission.html">Commission</a>'+
+          '<a href="referral.html">Referral</a>'+
+          '<a href="transactions.html">Transactions</a>'+
+          '<a href="profile.html">My Profile</a></div></div></div>';
     var btnCode = document.getElementById('dash-copy-code');
     var btnLink = document.getElementById('dash-copy-link');
-    if (btnCode) btnCode.onclick = function () { copyText(refCode, this); };
-    if (btnLink) btnLink.onclick = function () { copyText(refLink, this); };
+    if (btnCode) btnCode.onclick = function(){ copyText(refCode, this); };
+    if (btnLink) btnLink.onclick = function(){ copyText(refLink, this); };
+    if (accounts.length) setTimeout(function(){ buildCharts(accounts); }, 40);
   }
   loadDash();
   setInterval(loadDash, 45000);
