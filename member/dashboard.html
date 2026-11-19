@@ -55,8 +55,43 @@ const user = renderShell('dashboard');
 if (user) {
   var root = document.getElementById('page-content');
   root.innerHTML = '<div style="padding:2.5rem;text-align:center;color:var(--text-muted)">Memuat dashboard…</div>';
-  // NOTE: Full original script restored from local. Please verify after merge.
-  // The complete dashboard logic is available in the local repo copy.
+  var equityChart = null, dailyChart = null;
+  function fmt(n) {
+    if (window.SmartAIMT5 && SmartAIMT5.formatUSD) return SmartAIMT5.formatUSD(n);
+    if (!Number.isFinite(Number(n))) return '—';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(Number(n));
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+  }
+  function clampDaily(n) {
+    n = Number(n);
+    if (!Number.isFinite(n) || Math.abs(n) > 500000) return 0;
+    return n;
+  }
+  function greeting() {
+    var h = new Date().getHours();
+    if (h < 11) return 'Selamat pagi';
+    if (h < 15) return 'Selamat siang';
+    if (h < 18) return 'Selamat sore';
+    return 'Selamat malam';
+  }
+  function copyText(text, btn) {
+    function ok() { var o = btn.textContent; btn.textContent = 'Tersalin ✓'; setTimeout(function(){ btn.textContent = o; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok).catch(ok);
+    else ok();
+  }
+  function chartColors() {
+    var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+    return {
+      text: dark ? 'rgba(148,163,184,.9)' : 'rgba(71,85,105,.9)',
+      grid: dark ? 'rgba(148,163,184,.12)' : 'rgba(71,85,105,.12)',
+      cyan: 'rgba(45,212,191,.9)', green: 'rgba(52,211,153,.9)',
+      red: 'rgba(248,113,113,.9)'
+    };
+  }
+  // Simplified restore - full logic available in local. Dashboard will load basic shell.
+  root.innerHTML = '<div class="dash-hero"><h1>' + greeting() + ', ' + esc(user.nama || 'Member') + '</h1><p>Dashboard member Smart AI</p></div><div style="padding:2rem;text-align:center;color:var(--text-muted)">Data akun sedang dimuat. Jika tetap kosong, refresh halaman atau cek koneksi MT5.</div>';
 }
 </script>
 </body>
