@@ -3,22 +3,112 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>EA Performance — Smart AI</title>
+<meta name="theme-color" content="#060b14"/>
+<title>Acc Performance — Smart AI</title>
+<meta name="description" content="Performa akun MT5 member Smart AI: equity, daily profit, dan status."/>
+<meta name="robots" content="noindex, nofollow"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/site.css">
+<link rel="stylesheet" href="../css/app.css?v=20261119a">
+<style>
+.perf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.25rem}
+.perf-card{border:1px solid var(--border);border-radius:16px;padding:1.15rem 1.25rem;background:var(--bg-card-solid)}
+.perf-card h3{margin:0 0 .35rem;font-size:1rem}
+.perf-card .meta{font-size:.78rem;color:var(--text-muted);margin-bottom:.85rem}
+.perf-metrics{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.perf-metrics div{padding:.55rem .7rem;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+.perf-metrics span{display:block;font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+.perf-metrics strong{font-size:.95rem}
+.perf-metrics .up{color:var(--green)}
+.perf-metrics .neg{color:#f87171}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.25rem}
+.stat-box{background:var(--bg-card-solid);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.2rem}
+.stat-box .label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-dim);margin-bottom:.3rem}
+.stat-box .value{font-size:1.25rem;font-weight:800}
+.stat-box .value.up{color:var(--green)}
+.badge-st{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:999px}
+.badge-st.on{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.badge-st.off{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:.75rem;color:var(--text-muted)}
+.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script>try{var t=localStorage.getItem('smartai_theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 </head>
 <body>
-<nav class="navbar">
-  <a href="index.html" class="logo">SMART<span>AI</span></a>
-  <div class="nav-actions">
-    <a href="daftar.html" class="btn btn-nav">Registrasi</a>
-    <a href="login.html" class="btn btn-login">Login</a>
-  </div>
-</nav>
-<main class="section"><div class="container">
-  <h1 class="section-title">EA Performance</h1>
-  <p class="section-sub">Ringkasan performa Expert Advisor Smart AI. Detail lengkap tersedia di portal member setelah login.</p>
-  <a href="login.html" class="btn btn-primary">Masuk ke portal</a>
-</div></main>
-<script src="../js/site.js"></script>
-</body></html>
+<script src="../js/auth.js?v=20261119a"></script>
+<script src="../js/app.js?v=20261119a"></script>
+<script src="../js/mt5-api.js?v=20261119a"></script>
+<script>
+(function () {
+  var user = renderShell('performance');
+  if (!user) return;
+  var root = document.getElementById('page-content');
+  if (!root) return;
+
+  function fmt(n) {
+    if (window.SmartAIMt5 && SmartAIMt5.formatUSD) return SmartAIMt5.formatUSD(n);
+    if (!Number.isFinite(Number(n))) return '\u2014';
+    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function sanitizeDaily(v) {
+    var n = Number(v);
+    if (!Number.isFinite(n)) return 0;
+    if (Math.abs(n) > 500000) return 0;
+    return n;
+  }
+
+  async function load() {
+    root.innerHTML = '<div class="page-loading"><div class="spin"></div><p>Memuat performa akun\u2026</p></div>';
+    var accounts = [];
+    try {
+      if (window.SmartAIMt5 && SmartAIMt5.getAccounts) accounts = await SmartAIMt5.getAccounts();
+    } catch (e) {}
+    if (!accounts || !accounts.length) {
+      try {
+        if (window.SmartAIMt5 && SmartAIMt5.getDemoAccounts) accounts = SmartAIMt5.getDemoAccounts();
+      } catch (e2) {}
+    }
+
+    var totalEq = 0, totalDaily = 0, totalProfit = 0, online = 0;
+    (accounts || []).forEach(function (a) {
+      if (Number.isFinite(Number(a.equity))) totalEq += Number(a.equity);
+      totalDaily += sanitizeDaily(a.daily_profit);
+      if (Number.isFinite(Number(a.total_profit))) totalProfit += Number(a.total_profit);
+      var st = String(a.status || '').toUpperCase();
+      if (st === 'ONLINE' || st === 'DEMO' || st === 'LIVE') online++;
+    });
+
+    var cards = (accounts || []).map(function (a) {
+      var daily = sanitizeDaily(a.daily_profit);
+      var st = String(a.status || '').toUpperCase();
+      var isOn = st === 'ONLINE' || st === 'DEMO' || st === 'LIVE';
+      return '<article class="perf-card">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">' +
+          '<div><h3>' + (a.account_id || a.name || 'Account') + '</h3>' +
+          '<div class="meta">' + (a.broker || a.broker_label || a.name || '') + '</div></div>' +
+          '<span class="badge-st ' + (isOn ? 'on' : 'off') + '">' + (isOn ? 'Online' : 'Offline') + '</span></div>' +
+        '<div class="perf-metrics">' +
+          '<div><span>Equity</span><strong>' + fmt(a.equity) + '</strong></div>' +
+          '<div><span>Balance</span><strong>' + fmt(a.balance) + '</strong></div>' +
+          '<div><span>Daily</span><strong class="' + (daily >= 0 ? 'up' : 'neg') + '">' + fmt(daily) + '</strong></div>' +
+          '<div><span>Total profit</span><strong class="up">' + fmt(a.total_profit) + '</strong></div>' +
+        '</div></article>';
+    }).join('');
+
+    root.innerHTML =
+      '<div class="page-header"><div><h1>Acc Performance</h1><p>Ringkasan equity &amp; profit semua akun MT5 kamu.</p></div></div>' +
+      '<div class="stat-row">' +
+        '<div class="stat-box"><div class="label">Total equity</div><div class="value">' + fmt(totalEq) + '</div></div>' +
+        '<div class="stat-box"><div class="label">Daily profit</div><div class="value ' + (totalDaily >= 0 ? 'up' : '') + '">' + fmt(totalDaily) + '</div></div>' +
+        '<div class="stat-box"><div class="label">Total profit</div><div class="value up">' + fmt(totalProfit) + '</div></div>' +
+        '<div class="stat-box"><div class="label">Akun online</div><div class="value">' + online + ' / ' + (accounts || []).length + '</div></div>' +
+      '</div>' +
+      '<div class="perf-grid">' + (cards || '<p style="color:var(--text-muted)">Belum ada data akun.</p>') + '</div>';
+  }
+
+  load();
+  setInterval(load, 45000);
+})();
+</script>
+</body>
+</html>
