@@ -34,197 +34,88 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function apiUrl(action, extra) {
-    var proxy = (typeof w.SMARTAI_API_PROXY === 'string' && w.SMARTAI_API_PROXY) ? w.SMARTAI_API_PROXY.replace(/\/$/, '') : null;
-    if (proxy) {
-      if (action === 'live') return proxy + '/live.php';
-      if (action === 'history') return proxy + '/history.php' + (extra || '');
-    }
-    var q = '?action=' + encodeURIComponent(action);
-    if (extra) q += extra.replace(/^\?/, '&');
-    return LIVE_BASE + q;
-  }
-
   function num(v) {
-    if (v === null || v === undefined || v === '' || !isFinite(Number(v))) return null;
-    return Number(v);
+    var n = Number(v);
+    return Number.isFinite(n) ? n : 0;
   }
 
   function normalizeAccount(a) {
-    if (!a || typeof a !== 'object') return null;
-    var id = String(a.account_id || a.id || '');
-    if (!id) return null;
+    if (!a) return null;
+    var id = a.account_id || a.id || a.login || '';
     var meta = ACCOUNT_META[id] || {};
     return {
-      account_id: id, name: a.name || meta.package || null, package: meta.package || a.name || null,
-      login: meta.login || null, owner: meta.owner || null, server: meta.server || null,
-      broker: a.broker || meta.broker_label || null, broker_label: meta.broker_label || a.broker || null,
-      mode: meta.mode || null, status: a.status || 'WAITING',
-      balance: num(a.balance), equity: num(a.equity), deposit_awal: num(a.deposit_awal),
-      daily_profit: num(a.daily_profit), total_profit: num(a.total_profit),
-      daily_dd: num(a.daily_dd), total_dd: num(a.total_dd),
-      total_penarikan: num(a.total_penarikan != null ? a.total_penarikan : a.total_withdrawal),
-      updated_at: a.updated_at || null
+      account_id: id,
+      status: a.status || 'DEMO',
+      balance: num(a.balance),
+      equity: num(a.equity),
+      deposit_awal: num(a.deposit_awal),
+      daily_profit: (function(v){ v = num(v); if (!Number.isFinite(v) || Math.abs(v) > 500000) return 0; return v; })(a.daily_profit),
+      total_profit: num(a.total_profit),
+      daily_dd: num(a.daily_dd),
+      total_penarikan: num(a.total_penarikan),
+      updated_at: a.updated_at || '',
+      name: a.name || meta.package || id,
+      broker: a.broker || meta.broker_label || '',
+      broker_label: meta.broker_label || a.broker || '',
+      package: meta.package || a.name || '',
+      login: meta.login || a.login || null,
+      owner: meta.owner || a.owner || null,
+      server: meta.server || a.server || null,
+      mode: meta.mode || null
     };
   }
 
   function cloneAccounts(list) {
-    return (list || []).map(function(a){ return Object.assign({}, a); });
+    return (list || []).map(function (a) { return Object.assign({}, a); });
   }
 
-  function fetchJson(url, timeoutMs) {
-    timeoutMs = timeoutMs || 8000;
-    return new Promise(function(resolve, reject) {
-      var done = false;
-      var timer = setTimeout(function() {
-        if (done) return; done = true; reject(new Error('Timeout ' + timeoutMs + 'ms'));
-      }, timeoutMs);
-      fetch(url, { method: 'GET', mode: 'cors', credentials: 'omit', cache: 'default', headers: { 'Accept': 'application/json' } })
-        .then(function(res) { if (done) return; if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
-        .then(function(data) { if (done) return; done = true; clearTimeout(timer); resolve(data); })
-        .catch(function(err) { if (done) return; done = true; clearTimeout(timer); reject(err); });
-    });
+  function apiUrl(action, extra) {
+    var params = new URLSearchParams();
+    params.set('action', action || 'accounts');
+    if (extra) Object.keys(extra).forEach(function (k) { if (extra[k] != null) params.set(k, extra[k]); });
+    return LIVE_BASE + '?' + params.toString();
   }
 
-  function fetchAccountsNetwork() {
+  function fetchLiveAccounts() {
+    return fetch(apiUrl('accounts'), { method: 'GET', mode: 'cors', cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok || !Array.isArray(data.accounts)) throw new Error('Invalid live response');
+        var list = data.accounts.map(normalizeAccount).filter(Boolean);
+        if (!list.length) throw new Error('No accounts');
+        cache.accounts = list; cache.isLive = true; cache.fetchedAt = Date.now(); cache.error = null;
+        return cloneAccounts(list);
+      });
+  }
+
+  function getAccounts(force) {
+    var age = cache.fetchedAt ? (Date.now() - cache.fetchedAt) : Infinity;
+    if (!force && cache.accounts && age < FRESH_MS) return Promise.resolve(cloneAccounts(cache.accounts));
+    if (!force && cache.accounts && age < FRESH_MS * 4) {
+      fetchLiveAccounts().catch(function () {});
+      return Promise.resolve(cloneAccounts(cache.accounts));
+    }
     if (cache.inflightAccounts) return cache.inflightAccounts;
-    cache.inflightAccounts = fetchJson(apiUrl('live'), 8000).then(function(data) {
-      if (!data || !data.ok || !Array.isArray(data.accounts)) throw new Error('Invalid live response');
-      var list = data.accounts.map(normalizeAccount).filter(Boolean);
-      if (!list.length) throw new Error('No accounts');
-      cache.accounts = list; cache.isLive = true; cache.fetchedAt = Date.now(); cache.error = null;
-      return list;
-    }).catch(function(err) {
-      cache.error = err && err.message ? err.message : String(err);
-      cache.isLive = false; throw err;
-    }).finally(function() { cache.inflightAccounts = null; });
+    cache.inflightAccounts = fetchLiveAccounts()
+      .catch(function (err) {
+        cache.error = String(err && err.message || err);
+        if (cache.accounts) return cloneAccounts(cache.accounts);
+        return demoAccounts.map(function(a){ return normalizeAccount(a); });
+      })
+      .finally(function () { cache.inflightAccounts = null; });
     return cache.inflightAccounts;
   }
 
-  async function getAccounts(force) {
-    var age = cache.fetchedAt ? (Date.now() - cache.fetchedAt) : Infinity;
-    if (!force && cache.accounts && age < FRESH_MS) return cloneAccounts(cache.accounts);
-    if (!force && cache.accounts && age < FRESH_MS * 4) {
-      fetchAccountsNetwork().catch(function(){});
-      return cloneAccounts(cache.accounts);
-    }
-    try {
-      var list = await fetchAccountsNetwork();
-      return cloneAccounts(list);
-    } catch (err) {
-      if (cache.accounts) return cloneAccounts(cache.accounts);
-      return demoAccounts.map(function(a){ return normalizeAccount(a); });
-    }
+  function getDemoAccounts() {
+    return demoAccounts.map(function (a) { return normalizeAccount(a); });
   }
 
-  function equityHistoryToDailyProfit(historyRows) {
-    var byAcc = {};
-    (historyRows || []).forEach(function(h) {
-      if (!h || !h.account_id || h.equity == null) return;
-      var day = String(h.timestamp || '').slice(0, 10);
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
-      var eq = Number(h.equity);
-      if (!Number.isFinite(eq)) return;
-      if (!byAcc[h.account_id]) byAcc[h.account_id] = {};
-      byAcc[h.account_id][day] = eq;
-    });
-    var out = [];
-    Object.keys(byAcc).forEach(function(accId) {
-      var days = Object.keys(byAcc[accId]).sort();
-      var prev = null;
-      days.forEach(function(day) {
-        var eq = byAcc[accId][day];
-        var profit = prev === null ? 0 : Math.round((eq - prev) * 100) / 100;
-        out.push({ date: day, profit: profit, account_id: accId, equity: eq });
-        prev = eq;
-      });
-    });
-    return out;
-  }
-
-  function generateDemoHistory(year, month, accountId) {
-    var results = [];
-    var daysInMonth = new Date(year, month, 0).getDate();
-    var accounts = accountId ? demoAccounts.filter(function(a) { return a.account_id === accountId; }) : demoAccounts;
-    accounts.forEach(function(acc) {
-      var base = Number(acc.daily_profit) || 200;
-      for (var d = 1; d <= daysInMonth; d++) {
-        var dateStr = year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-        var seed = year * 10000 + month * 100 + d + (acc.account_id.charCodeAt(4) || 1) * 17;
-        var r = Math.sin(seed) * 10000; r = r - Math.floor(r);
-        var weekday = new Date(year, month - 1, d).getDay();
-        var profit;
-        if (weekday === 0 || weekday === 6) profit = r < 0.75 ? 0 : base * 0.2 * (r - 0.5);
-        else if (r < 0.12) profit = -(base * (0.3 + r));
-        else if (r < 0.7) profit = base * (0.5 + r);
-        else profit = base * (1.2 + r);
-        results.push({ date: dateStr, profit: Math.round(profit * 100) / 100, account_id: acc.account_id });
-      }
-    });
-    return results;
-  }
-
-  function fetchHistoryNetwork() {
-    if (cache.inflightHistory) return cache.inflightHistory;
-    cache.inflightHistory = fetchJson(apiUrl('history', '?days=45'), 10000).then(function(data) {
-      if (!data || !data.ok || !Array.isArray(data.history)) throw new Error('Invalid history');
-      cache.history = equityHistoryToDailyProfit(data.history);
-      cache.historyFetchedAt = Date.now();
-      cache.isLive = true;
-      return cache.history;
-    }).finally(function() { cache.inflightHistory = null; });
-    return cache.inflightHistory;
-  }
-
-  async function getDailyHistory(year, month, accountId) {
-    try {
-      var age = cache.historyFetchedAt ? (Date.now() - cache.historyFetchedAt) : Infinity;
-      if (!cache.history || age > HISTORY_FRESH_MS) {
-        if (cache.history && age < HISTORY_FRESH_MS * 2) fetchHistoryNetwork().catch(function(){});
-        else await fetchHistoryNetwork();
-      }
-      var prefix = year + '-' + String(month).padStart(2, '0');
-      return (cache.history || []).filter(function(r) {
-        if (accountId && r.account_id !== accountId) return false;
-        return r.date.indexOf(prefix) === 0;
-      }).map(function(r){ return Object.assign({}, r); });
-    } catch (err) {
-      if (cache.history) {
-        var p = year + '-' + String(month).padStart(2, '0');
-        return cache.history.filter(function(r) {
-          if (accountId && r.account_id !== accountId) return false;
-          return r.date.indexOf(p) === 0;
-        }).map(function(r){ return Object.assign({}, r); });
-      }
-      return generateDemoHistory(year, month, accountId);
-    }
-  }
-
-  function getAccountMeta(id) {
-    return ACCOUNT_META[id] ? Object.assign({}, ACCOUNT_META[id]) : null;
-  }
-
-  try {
-    if (typeof document !== 'undefined') {
-      var boot = function() {
-        getAccounts(false).catch(function(){});
-        getDailyHistory(new Date().getFullYear(), new Date().getMonth() + 1, null).catch(function(){});
-      };
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-      else boot();
-    }
-  } catch (e) {}
-
-  w.SmartAIMT5 = {
-    base: 'LIVE',
-    getAccounts: getAccounts,
-    getDailyHistory: getDailyHistory,
-    getAccountMeta: getAccountMeta,
+  w.SmartAIMt5 = {
     formatUSD: formatUSD,
     formatNumber: formatNumber,
     escape: escape,
-    isLive: function(){ return !!cache.isLive; },
-    lastError: function(){ return cache.error; },
-    lastFetchedAt: function(){ return cache.fetchedAt; }
+    getAccounts: getAccounts,
+    getDemoAccounts: getDemoAccounts,
+    ACCOUNT_META: ACCOUNT_META
   };
 })(window);
