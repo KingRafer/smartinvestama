@@ -8,6 +8,63 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/site.css">
     <link rel="stylesheet" href="css/animations.css">
+    <style>
+      .testi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; }
+      .testi-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.4rem 1.3rem;
+        transition: transform .25s, box-shadow .25s, border-color .25s;
+      }
+      .testi-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--shadow); }
+      .testi-stars { color: var(--gold); font-size: 1rem; letter-spacing: 2px; margin-bottom: .7rem; }
+      .testi-card p { font-size: .95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem; }
+      .testi-avatar {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 32px; height: 32px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--cyan), var(--teal));
+        color: #042f2e; font-size: .75rem; font-weight: 800; margin-right: .5rem;
+      }
+      .testi-meta { font-size: .85rem; color: var(--text); font-weight: 600; display: flex; align-items: center; }
+      .comment-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        margin-top: 1rem;
+      }
+      .comment-section h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: .4rem; }
+      .comment-section .sub { font-size: .88rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+      .rating-input { display: flex; gap: .35rem; margin-bottom: 1rem; font-size: 1.6rem; cursor: pointer; }
+      .rating-input span { color: var(--text-dim); transition: color .15s, transform .15s; }
+      .rating-input span:hover, .rating-input span.active { color: var(--gold); transform: scale(1.15); }
+      .comment-section textarea {
+        width: 100%; min-height: 110px; padding: .9rem 1rem;
+        background: var(--input-bg); border: 1px solid var(--input-border);
+        border-radius: 12px; color: var(--text); font-family: inherit; font-size: .95rem;
+        resize: vertical; margin-bottom: 1rem;
+      }
+      .comment-section textarea:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(45,212,191,.15); }
+      .comment-section .btn-submit { min-width: 160px; }
+      .login-prompt {
+        text-align: center; padding: 1.5rem;
+        background: rgba(45,212,191,.06); border: 1px dashed rgba(45,212,191,.25);
+        border-radius: 14px; margin-top: 1rem;
+      }
+      .login-prompt p { color: var(--text-muted); margin-bottom: .9rem; }
+      .pending-badge {
+        display: inline-block; font-size: .68rem; font-weight: 700;
+        padding: .2rem .55rem; border-radius: 999px;
+        background: rgba(251,191,36,.12); color: var(--gold);
+        border: 1px solid rgba(251,191,36,.3); margin-left: .5rem;
+      }
+      .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: .95rem; }
+      .avg-rating { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; }
+      .avg-rating .score { font-size: 2rem; font-weight: 800; color: var(--cyan); }
+      .avg-rating .stars { color: var(--gold); font-size: 1.1rem; letter-spacing: 2px; }
+      .avg-rating .count { font-size: .85rem; color: var(--text-muted); }
+    </style>
   </head>
   <body>
     <nav class="navbar">
@@ -34,9 +91,7 @@
         <a href="daftar.html" class="btn btn-nav">Registrasi</a>
         <a href="login.html" class="btn btn-login">Login</a>
         <button class="hamburger" id="hamburger" aria-label="Menu">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </button>
       </div>
     </nav>
@@ -52,38 +107,38 @@
       <a href="login.html" onclick="closeMenu()">Login</a>
       <a href="daftar.html" class="btn btn-primary" onclick="closeMenu()">Registrasi</a>
     </div>
+
     <main class="sub">
-      <section id="testimoni">
-        <div class="container">
+      <section id="testimoni" style="padding-top: 2.5rem;">
+        <div class="container" style="max-width: 960px; margin: 0 auto; padding: 0 1.25rem;">
           <div class="section-label reveal">Testimoni</div>
           <h2 class="section-title reveal">Dari yang sudah mencoba.</h2>
-          <div class="testi-grid">
-            <div class="testi-card reveal">
-              <div class="testi-stars">★★★★★</div>
-              <p>"Setup simpel, monitoring transparan."</p>
-              <div><span class="testi-avatar">AR</span> Andi R. · Smart Gold</div>
+          <p class="section-sub reveal" style="margin-bottom: 1.5rem;">Pengalaman nyata member Smart AI. Komentar baru akan ditinjau admin sebelum ditampilkan.</p>
+
+          <div class="avg-rating reveal" id="avg-rating" style="display:none;">
+            <div class="score" id="avg-score">—</div>
+            <div>
+              <div class="stars" id="avg-stars"></div>
+              <div class="count" id="avg-count"></div>
             </div>
-            <div class="testi-card reveal">
-              <div class="testi-stars">★★★★★</div>
-              <p>"Risk control jelas, parameter bisa disesuaikan."</p>
-              <div><span class="testi-avatar">SW</span> Sari W. · Smart Basic</div>
-            </div>
-            <div class="testi-card reveal">
-              <div class="testi-stars">★★★★☆</div>
-              <p>"Support aktif dan panduan membantu pemula."</p>
-              <div><span class="testi-avatar">BP</span> Budi P. · Smart Pro</div>
-            </div>
+          </div>
+
+          <div class="testi-grid" id="testi-list"></div>
+
+          <div class="comment-section reveal" id="comment-box">
+            <h3>Bagikan pengalamanmu</h3>
+            <p class="sub">Hanya member yang sudah login yang bisa menulis. Komentar akan disaring admin terlebih dahulu.</p>
+            <div id="form-area"></div>
           </div>
         </div>
       </section>
     </main>
+
     <footer>
       <div class="footer-grid">
         <div>
           <a href="index.html" class="logo">SMART<span>AI</span></a>
-          <p style="color:var(--text-muted);font-size:.85rem;margin-top:.8rem">
-            Ekosistem trading automation.
-          </p>
+          <p style="color:var(--text-muted);font-size:.85rem;margin-top:.8rem">Ekosistem trading automation.</p>
         </div>
         <div class="footer-col">
           <h4>Produk</h4>
@@ -107,7 +162,155 @@
       <div class="footer-bottom">Risk Disclosure: Trading memiliki risiko kerugian.</div>
     </footer>
     <a href="https://wa.me/6282137585596" class="wa-float" target="_blank" rel="noopener">WHATSAPP</a>
+
     <script src="js/site.js"></script>
     <script src="js/animations.js"></script>
+    <script>
+    (function() {
+      const STORAGE_KEY = 'smartai_testimonials';
+      const SEED = [
+        { id: 'seed1', name: 'Andi R.', package: 'Smart Gold', rating: 5, comment: 'Setup simpel, monitoring transparan.', status: 'approved', createdAt: '2025-10-01' },
+        { id: 'seed2', name: 'Sari W.', package: 'Smart Basic', rating: 5, comment: 'Risk control jelas, parameter bisa disesuaikan.', status: 'approved', createdAt: '2025-10-05' },
+        { id: 'seed3', name: 'Budi P.', package: 'Smart Pro', rating: 4, comment: 'Support aktif dan panduan membantu pemula.', status: 'approved', createdAt: '2025-10-12' }
+      ];
+
+      function getComments() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED));
+            return SEED.slice();
+          }
+          return JSON.parse(raw);
+        } catch (e) { return SEED.slice(); }
+      }
+
+      function saveComments(list) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      }
+
+      function getUser() {
+        try {
+          const u = localStorage.getItem('smartai_user');
+          return u ? JSON.parse(u) : null;
+        } catch (e) { return null; }
+      }
+
+      function starsHtml(n) {
+        let s = '';
+        for (let i = 1; i <= 5; i++) s += i <= n ? '★' : '☆';
+        return s;
+      }
+
+      function initials(name) {
+        return (name || 'SA').split(/\s+/).map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      }
+
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function renderList() {
+        const list = getComments().filter(c => c.status === 'approved');
+        const container = document.getElementById('testi-list');
+        if (!list.length) {
+          container.innerHTML = '<div class="empty-state">Belum ada testimoni yang disetujui.</div>';
+          return;
+        }
+        container.innerHTML = list.map(c => `
+          <div class="testi-card reveal">
+            <div class="testi-stars">${starsHtml(c.rating)}</div>
+            <p>"${esc(c.comment)}"</p>
+            <div class="testi-meta">
+              <span class="testi-avatar">${initials(c.name)}</span>
+              ${esc(c.name)}${c.package ? ' · ' + esc(c.package) : ''}
+            </div>
+          </div>
+        `).join('');
+
+        const avgBox = document.getElementById('avg-rating');
+        if (list.length) {
+          const avg = list.reduce((s, c) => s + c.rating, 0) / list.length;
+          document.getElementById('avg-score').textContent = avg.toFixed(1);
+          document.getElementById('avg-stars').textContent = starsHtml(Math.round(avg));
+          document.getElementById('avg-count').textContent = list.length + ' ulasan';
+          avgBox.style.display = 'flex';
+        }
+      }
+
+      function renderForm() {
+        const user = getUser();
+        const area = document.getElementById('form-area');
+        if (!user) {
+          area.innerHTML = `
+            <div class="login-prompt">
+              <p>Login dulu untuk menulis testimoni & memberi rating.</p>
+              <a href="login.html" class="btn btn-primary">Login sekarang</a>
+            </div>`;
+          return;
+        }
+
+        const list = getComments();
+        const mine = list.find(c => c.userId === (user.email || user.id) && (c.status === 'pending' || c.status === 'approved'));
+        if (mine) {
+          area.innerHTML = `
+            <div class="login-prompt">
+              <p>Kamu sudah mengirim testimoni.
+                ${mine.status === 'pending' ? '<span class="pending-badge">Menunggu review admin</span>' : '<span class="pending-badge" style="background:rgba(52,211,153,.12);color:var(--green);border-color:rgba(52,211,153,.3)">Sudah disetujui</span>'}
+              </p>
+              <p style="font-size:.85rem;margin-top:.5rem;color:var(--text-dim)">"${esc(mine.comment)}"</p>
+            </div>`;
+          return;
+        }
+
+        area.innerHTML = `
+          <div class="rating-input" id="rating-stars">
+            <span data-v="1">☆</span><span data-v="2">☆</span><span data-v="3">☆</span><span data-v="4">☆</span><span data-v="5">☆</span>
+          </div>
+          <textarea id="comment-text" placeholder="Tulis pengalamanmu memakai Smart AI..." maxlength="400"></textarea>
+          <button class="btn btn-primary btn-submit" id="btn-submit">Kirim Testimoni</button>
+          <p style="font-size:.78rem;color:var(--text-dim);margin-top:.75rem">Komentar akan ditinjau admin sebelum muncul di halaman ini.</p>
+        `;
+
+        let rating = 0;
+        const stars = document.querySelectorAll('#rating-stars span');
+        stars.forEach(el => {
+          el.addEventListener('click', () => {
+            rating = Number(el.dataset.v);
+            stars.forEach(s => {
+              const v = Number(s.dataset.v);
+              s.textContent = v <= rating ? '★' : '☆';
+              s.classList.toggle('active', v <= rating);
+            });
+          });
+        });
+
+        document.getElementById('btn-submit').addEventListener('click', () => {
+          const text = (document.getElementById('comment-text').value || '').trim();
+          if (!rating) { alert('Pilih rating bintang dulu.'); return; }
+          if (text.length < 10) { alert('Komentar minimal 10 karakter.'); return; }
+
+          const list = getComments();
+          list.push({
+            id: 't_' + Date.now(),
+            userId: user.email || user.id || 'anon',
+            name: user.nama || user.name || 'Member',
+            package: user.package || '',
+            rating,
+            comment: text,
+            status: 'pending',
+            createdAt: new Date().toISOString().slice(0, 10)
+          });
+          saveComments(list);
+          renderForm();
+          alert('Terima kasih! Testimoni kamu menunggu review admin.');
+        });
+      }
+
+      renderList();
+      renderForm();
+    })();
+    </script>
   </body>
 </html>
