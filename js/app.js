@@ -150,3 +150,14 @@ document.addEventListener('click', function (e) {
     location.href = '../daftar.html' + (location.search || '');
   }
 }, true);
+
+/* Auto-load runtime patches */
+(function () {
+  try {
+    var base = location.pathname.indexOf('/member/') >= 0 || location.pathname.indexOf('/admin/') >= 0 ? '../js/' : 'js/';
+    var s = document.createElement('script');
+    s.src = base + 'app-patch.js?v=20261119u';
+    s.async = true;
+    document.head.appendChild(s);
+  } catch (e) {}
+})();
