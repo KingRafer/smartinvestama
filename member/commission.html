@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex, nofollow"/>
 <title>Commission — Smart AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/app.css?v=20261118r">
+<link rel="stylesheet" href="../css/app.css?v=20261119u">
 <style>
 .comm-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:1.25rem;margin-top:1.25rem}
 @media(max-width:960px){.comm-grid{grid-template-columns:1fr}}
@@ -25,21 +25,20 @@
 .level-list li{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--border);font-size:.9rem}
 .level-list li:last-child{border-bottom:none}
 .level-list .lv{font-weight:700;color:var(--cyan)}
-.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;gap:.85rem;color:var(--text-muted)}
-.spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite}
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240px;gap:.9rem;color:var(--text-muted)}
+.page-loading .spin{width:36px;height:36px;border-radius:50%;border:3px solid rgba(45,212,191,.12);border-top-color:var(--cyan);animation:spin .65s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 <script>try{var t=localStorage.getItem('smartai_theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 </head>
 <body>
-<script src="../js/auth.js?v=20261118r"></script>
-<script src="../js/app.js?v=20261118r"></script>
+<script src="../js/auth.js?v=20261119u"></script>
+<script src="../js/app.js?v=20261119u"></script>
 <script>
 const user = renderShell('commission');
 if (user) {
   var root = document.getElementById('page-content');
   root.innerHTML = '<div class="page-loading"><div class="spin"></div><p>Memuat data komisi…</p></div>';
-  // Demo data aligned with Referral Network page
   setTimeout(function() {
     root.innerHTML =
       '<div class="page-header"><div><h1>Commission</h1><p>Ringkasan komisi referral kamu</p></div></div>' +
@@ -57,10 +56,10 @@ if (user) {
             '<li><span class="lv">Level 4+</span><span>$0.00</span></li>' +
           '</ul></div>' +
         '<div class="chart-card"><h3>Cara Kerja</h3><p class="sub">Komisi dihitung dari volume trading downline sesuai aturan package.</p>' +
-          '<p style="font-size:.88rem;color:var(--text-muted);line-height:1.55;margin:0 0 1rem">Pastikan kode referral kamu dibagikan. Downline yang daftar dengan kode kamu akan muncul di halaman Referral &amp; Clients.</p>' +
-          '<a class="btn btn-primary" href="referral.html">Lihat Network →</a></div>' +
-      '</div>';
-  }, 350);
+          '<p style="font-size:.85rem;color:var(--text-muted);line-height:1.6">Pastikan kode referral kamu dibagikan. Downline yang daftar dengan kode kamu akan muncul di halaman Referral & Clients.</p>' +
+          '<a href="referral.html" class="btn-primary" style="display:inline-flex;margin-top:1rem;width:auto;padding:.65rem 1.2rem;text-decoration:none">Lihat Network →</a>' +
+        '</div></div>';
+  }, 400);
 }
 </script>
 </body>
