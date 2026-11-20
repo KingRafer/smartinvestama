@@ -1,19 +1,29 @@
-# Smart AI Investama
+# Smart AI — Unified System
 
-Platform member + admin untuk trading EA, referral, komisi, Smart Master, news, dan WD.
+Satu sistem yang menggabungkan **Landing**, **Member Dashboard**, dan **Admin Panel**.
 
 ## Struktur
-- `index.html` — landing
-- `member/` — dashboard member
-- `admin/` — panel admin
-- `css/`, `js/`, `img/` — assets
 
-## Fitur utama
-- Acc Performance + kalender profit
-- Referral network + komisi $15 ($10 direct / $5 upline)
-- Smart Master (copy-trade channel, rank, signal)
-- News & notifikasi (termasuk signal)
-- WD komisi + bank profile
-- Admin: members, WD, masters, announcements
+```
+smartai/
+├── index.html          → Landing page (publik)
+├── login.html          → Login
+├── daftar.html         → Register
+├── member/             → Dashboard member
+├── admin/              → Panel admin
+├── css/                → Stylesheets
+├── js/                 → Scripts
+└── assets/             → Assets
+```
 
-Buka `login.html` (member) atau `admin/index.html` (admin).
+## Fitur Utama
+
+- Landing page modern dengan tema dark/light
+- Member dashboard: performance, referral, commission, profile
+- Admin panel: members, masters, commissions, settings, testimonials, announcements, withdrawals
+- Integrasi MT5 API
+- Theme switcher
+
+## Update
+
+Versi terbaru dari zip smartinvestama-updated.
